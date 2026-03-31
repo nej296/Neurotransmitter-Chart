@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neurotransmitter Wheel Chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+/* ================================================================
+   ROOT & RESET
+   ================================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-panel: rgba(18, 18, 30, 0.85);
+  --bg-card: rgba(25, 25, 40, 0.7);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(100, 140, 255, 0.15);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #3b82f6;
+  --glow-spread: 0 0 20px rgba(59, 130, 246, 0.15);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.light-theme {
+  --bg-primary: #f0f2f5;
+  --bg-secondary: #ffffff;
+  --bg-panel: rgba(255, 255, 255, 0.92);
+  --bg-card: rgba(240, 242, 245, 0.8);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-glow: rgba(59, 130, 246, 0.2);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --glow-spread: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* ================================================================
+   LAYOUT
+   ================================================================ */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  min-height: 52px;
+}
+
+.app-header h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #3b82f6, #c026d3, #10b981);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 220px;
+  padding: 7px 14px 7px 34px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+}
+
+.search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: var(--font);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ================================================================
+   LEFT SIDEBAR
+   ================================================================ */
+.left-sidebar {
+  width: 240px;
+  min-width: 240px;
+  padding: 14px;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  backdrop-filter: blur(12px);
+  z-index: 10;
+}
+
+.left-sidebar::-webkit-scrollbar { width: 4px; }
+.left-sidebar::-webkit-scrollbar-track { background: transparent; }
+.left-sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.filter-section h3 {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+}
+
+.filter-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-glow);
+}
+
+.filter-btn.inactive {
+  opacity: 0.35;
+}
+
+.filter-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.filter-label {
+  flex: 1;
+  line-height: 1.3;
+}
+
+.filter-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.reset-btn {
+  width: 100%;
+  padding: 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.5px;
+}
+
+.reset-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+  box-shadow: var(--glow-spread);
+}
+
+/* ================================================================
+   STATS PANEL
+   ================================================================ */
+.stats-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.stats-panel h3 {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 11px;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 6px 0;
+}
+
+/* ================================================================
+   WHEEL CONTAINER
+   ================================================================ */
+.wheel-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+}
+
+.wheel-container svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* ================================================================
+   TOOLTIP
+   ================================================================ */
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  border-radius: 10px;
+  padding: 12px 16px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  max-width: 320px;
+  font-size: 12px;
+}
+
+.tooltip.visible { opacity: 1; }
+
+.tooltip-name {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.tooltip-abbr {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.tooltip-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ================================================================
+   DETAIL PANEL (RIGHT SIDEBAR)
+   ================================================================ */
+.detail-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 360px;
+  height: 100%;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  backdrop-filter: blur(16px);
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.3);
+}
+
+.detail-panel.open {
+  transform: translateX(0);
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.detail-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.detail-abbr {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.detail-close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  margin-left: 12px;
+}
+
+.detail-close:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+}
+
+.detail-body::-webkit-scrollbar { width: 4px; }
+.detail-body::-webkit-scrollbar-track { background: transparent; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.detail-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.detail-badge .badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.detail-section {
+  margin-bottom: 14px;
+}
+
+.detail-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.detail-section-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ================================================================
+   LEGEND
+   ================================================================ */
+.legend-panel {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 14px;
+  backdrop-filter: blur(12px);
+  z-index: 20;
+  font-size: 10px;
+  max-width: 220px;
+}
+
+.legend-panel h4 {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 6px 0;
+}
+
+/* ================================================================
+   RING LABELS
+   ================================================================ */
+.ring-label-text {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  fill: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* ================================================================
+   ANIMATIONS
+   ================================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.left-sidebar > * {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 900px) {
+  .left-sidebar { width: 200px; min-width: 200px; }
+  .detail-panel { width: 300px; }
+}
+
+@media (max-width: 700px) {
+  .left-sidebar { display: none; }
+  .detail-panel { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+  <!-- HEADER -->
+  <header class="app-header">
+    <h1>Neurotransmitter Wheel</h1>
+    <div class="header-controls">
+      <div class="search-wrapper">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search neurotransmitters..." autocomplete="off">
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span id="themeIcon">&#9790;</span>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <!-- LEFT SIDEBAR -->
+    <aside class="left-sidebar" id="leftSidebar">
+      <!-- Category Filters -->
+      <div class="filter-section" id="categoryFilters">
+        <h3>Categories</h3>
+      </div>
+
+      <!-- Effect Filters -->
+      <div class="filter-section" id="effectFilters">
+        <h3>Postsynaptic Effect</h3>
+      </div>
+
+      <!-- Reset -->
+      <button class="reset-btn" id="resetBtn">Show All</button>
+
+      <!-- Stats -->
+      <div class="stats-panel" id="statsPanel">
+        <h3>Statistics</h3>
+        <div id="statsContent"></div>
+      </div>
+    </aside>
+
+    <!-- WHEEL -->
+    <div class="wheel-container" id="wheelContainer">
+      <svg id="wheelSvg"></svg>
+    </div>
+
+    <!-- TOOLTIP -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title" id="detailTitle"></div>
+          <div class="detail-abbr" id="detailAbbr"></div>
+        </div>
+        <button class="detail-close" id="detailClose">&times;</button>
+      </div>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND (absolute positioned over wheel area) -->
+<div class="legend-panel" id="legendPanel" style="display:none;"></div>
+
+<script>
+/* ================================================================
+   DATA FROM FLASK / JINJA2
+   ================================================================ */
+const ntData = {{ nt_data | tojson | safe }};
+const categoryColors = {{ category_colors | tojson | safe }};
+const effectColors = {{ effect_colors | tojson | safe }};
+const categories = {{ categories | tojson | safe }};
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let activeCategories = new Set(categories);
+let activeEffects = new Set(Object.keys(effectColors));
+let selectedNT = null;
+let hoveredNT = null;
+let searchTerm = '';
+let isDark = true;
+
+/* ================================================================
+   RING RADII
+   ================================================================ */
+const R0_INNER = 0, R0_OUTER = 80;
+const R1_INNER = 82, R1_OUTER = 170;
+const R2_INNER = 172, R2_OUTER = 200;
+const R3_INNER = 202, R3_OUTER = 270;
+const R4_INNER = 272, R4_OUTER = 340;
+const LABEL_RADIUS = 355;
+const VIEW_SIZE = 900;
+const PAD_ANGLE = 0.005;
+const CAT_PAD = 0.012;
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+function degToRad(d) { return d * Math.PI / 180; }
+
+function getVisibleNTs() {
+  let data = ntData.filter(nt =>
+    activeCategories.has(nt.category) &&
+    activeEffects.has(nt.postsynaptic_effect)
+  );
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    data = data.filter(nt =>
+      nt.name.toLowerCase().includes(term) ||
+      nt.abbreviation.toLowerCase().includes(term)
+    );
+  }
+  return data.sort((a, b) => {
+    const ci = categories.indexOf(a.category) - categories.indexOf(b.category);
+    if (ci !== 0) return ci;
+    return a.id - b.id;
+  });
+}
+
+function groupByCategory(data) {
+  const groups = [];
+  const catMap = new Map();
+  data.forEach(nt => {
+    if (!catMap.has(nt.category)) {
+      const g = { category: nt.category, nts: [] };
+      catMap.set(nt.category, g);
+      groups.push(g);
+    }
+    catMap.get(nt.category).nts.push(nt);
+  });
+  // Sort groups by canonical category order
+  groups.sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category));
+  return groups;
+}
+
+function computeLayout(data) {
+  const groups = groupByCategory(data);
+  const N = data.length;
+  if (N === 0) return { segments: [], catSegments: [] };
+
+  const totalAngle = 2 * Math.PI;
+  const anglePerNT = totalAngle / N;
+  const segments = [];
+  const catSegments = [];
+  let cursor = 0;
+
+  groups.forEach(group => {
+    const catStart = cursor;
+    group.nts.forEach(nt => {
+      segments.push({
+        nt: nt,
+        startAngle: cursor + PAD_ANGLE / 2,
+        endAngle: cursor + anglePerNT - PAD_ANGLE / 2,
+        midAngle: cursor + anglePerNT / 2
+      });
+      cursor += anglePerNT;
+    });
+    catSegments.push({
+      category: group.category,
+      color: categoryColors[group.category] || '#555',
+      startAngle: catStart + CAT_PAD / 2,
+      endAngle: cursor - CAT_PAD / 2,
+      midAngle: (catStart + cursor) / 2,
+      count: group.nts.length
+    });
+  });
+
+  return { segments, catSegments };
+}
+
+function clampAngle(a) {
+  while (a < 0) a += 2 * Math.PI;
+  while (a >= 2 * Math.PI) a -= 2 * Math.PI;
+  return a;
+}
+
+function textAngleDeg(midAngle) {
+  let deg = (midAngle * 180 / Math.PI) - 90;
+  // Flip text on bottom half so it reads left-to-right
+  if (midAngle > Math.PI / 2 && midAngle < 3 * Math.PI / 2) {
+    deg += 180;
+  }
+  return deg;
+}
+
+function arcWidth(startAngle, endAngle) {
+  return (endAngle - startAngle) * 180 / Math.PI;
+}
+
+function effectBadgeColor(effect) {
+  return effectColors[effect] || '#888';
+}
+
+function lightenColor(hex, pct) {
+  let r = parseInt(hex.slice(1,3), 16);
+  let g = parseInt(hex.slice(3,5), 16);
+  let b = parseInt(hex.slice(5,7), 16);
+  r = Math.min(255, r + Math.round((255 - r) * pct));
+  g = Math.min(255, g + Math.round((255 - g) * pct));
+  b = Math.min(255, b + Math.round((255 - b) * pct));
+  return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
+}
+
+function darkenColor(hex, pct) {
+  let r = parseInt(hex.slice(1,3), 16);
+  let g = parseInt(hex.slice(3,5), 16);
+  let b = parseInt(hex.slice(5,7), 16);
+  r = Math.max(0, Math.round(r * (1 - pct)));
+  g = Math.max(0, Math.round(g * (1 - pct)));
+  b = Math.max(0, Math.round(b * (1 - pct)));
+  return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
+}
+
+function truncateText(text, maxLen) {
+  if (!text) return '';
+  return text.length > maxLen ? text.substring(0, maxLen - 1) + '\u2026' : text;
+}
+
+/* ================================================================
+   BUILD FILTERS
+   ================================================================ */
+function buildFilters() {
+  const catContainer = document.getElementById('categoryFilters');
+  // Keep the h3
+  const catBtns = catContainer.querySelectorAll('.filter-btn');
+  catBtns.forEach(b => b.remove());
+
+  categories.forEach(cat => {
+    const count = ntData.filter(n => n.category === cat).length;
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn active';
+    btn.dataset.category = cat;
+    btn.innerHTML = `<span class="filter-dot" style="background:${categoryColors[cat]};box-shadow:0 0 6px ${categoryColors[cat]}"></span>
+      <span class="filter-label">${cat}</span>
+      <span class="filter-count">${count}</span>`;
+    btn.addEventListener('click', () => toggleCategoryFilter(cat, btn));
+    catContainer.appendChild(btn);
+  });
+
+  const effContainer = document.getElementById('effectFilters');
+  const effBtns = effContainer.querySelectorAll('.filter-btn');
+  effBtns.forEach(b => b.remove());
+
+  Object.keys(effectColors).forEach(eff => {
+    const count = ntData.filter(n => n.postsynaptic_effect === eff).length;
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn active';
+    btn.dataset.effect = eff;
+    btn.innerHTML = `<span class="filter-dot" style="background:${effectColors[eff]};box-shadow:0 0 6px ${effectColors[eff]}"></span>
+      <span class="filter-label">Postsynaptic Effect: ${eff}</span>
+      <span class="filter-count">${count}</span>`;
+    btn.addEventListener('click', () => toggleEffectFilter(eff, btn));
+    effContainer.appendChild(btn);
+  });
+}
+
+function toggleCategoryFilter(cat, btn) {
+  if (activeCategories.has(cat)) {
+    activeCategories.delete(cat);
+    btn.classList.remove('active');
+    btn.classList.add('inactive');
+  } else {
+    activeCategories.add(cat);
+    btn.classList.add('active');
+    btn.classList.remove('inactive');
+  }
+  drawWheel();
+  updateStats();
+}
+
+function toggleEffectFilter(eff, btn) {
+  if (activeEffects.has(eff)) {
+    activeEffects.delete(eff);
+    btn.classList.remove('active');
+    btn.classList.add('inactive');
+  } else {
+    activeEffects.add(eff);
+    btn.classList.add('active');
+    btn.classList.remove('inactive');
+  }
+  drawWheel();
+  updateStats();
+}
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  activeCategories = new Set(categories);
+  activeEffects = new Set(Object.keys(effectColors));
+  searchTerm = '';
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.add('active');
+    b.classList.remove('inactive');
+  });
+  hideDetailPanel();
+  drawWheel();
+  updateStats();
+});
+
+/* ================================================================
+   SEARCH
+   ================================================================ */
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchTerm = this.value.trim();
+  drawWheel();
+  updateStats();
+});
+
+/* ================================================================
+   STATS
+   ================================================================ */
+function updateStats() {
+  const visible = getVisibleNTs();
+  const total = visible.length;
+
+  let html = `<div class="stat-row"><span class="stat-label">Visible</span><span class="stat-value">${total} / ${ntData.length}</span></div>`;
+  html += '<hr class="stat-divider">';
+
+  // By effect
+  Object.keys(effectColors).forEach(eff => {
+    const c = visible.filter(n => n.postsynaptic_effect === eff).length;
+    html += `<div class="stat-row">
+      <span class="stat-label" style="display:flex;align-items:center;gap:4px">
+        <span style="width:6px;height:6px;border-radius:50%;background:${effectColors[eff]};display:inline-block"></span>
+        ${eff}
+      </span>
+      <span class="stat-value">${c}</span>
+    </div>`;
+  });
+
+  html += '<hr class="stat-divider">';
+
+  // By category
+  categories.forEach(cat => {
+    const c = visible.filter(n => n.category === cat).length;
+    if (c > 0) {
+      html += `<div class="stat-row">
+        <span class="stat-label" style="display:flex;align-items:center;gap:4px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${categoryColors[cat]};display:inline-block"></span>
+          ${cat}
+        </span>
+        <span class="stat-value">${c}</span>
+      </div>`;
+    }
+  });
+
+  document.getElementById('statsContent').innerHTML = html;
+}
+
+/* ================================================================
+   LEGEND
+   ================================================================ */
+function buildLegend() {
+  const panel = document.getElementById('legendPanel');
+  let html = '<h4>Categories</h4>';
+  categories.forEach(cat => {
+    html += `<div class="legend-item"><span class="legend-dot" style="background:${categoryColors[cat]}"></span>${cat}</div>`;
+  });
+  html += '<hr class="legend-divider"><h4>Postsynaptic Effect</h4>';
+  Object.keys(effectColors).forEach(eff => {
+    html += `<div class="legend-item"><span class="legend-dot" style="background:${effectColors[eff]}"></span>Postsynaptic Effect: ${eff}</div>`;
+  });
+  panel.innerHTML = html;
+  panel.style.display = 'block';
+
+  // Position legend relative to main content, lower-left of wheel area
+  const mc = document.querySelector('.main-content');
+  const sidebar = document.getElementById('leftSidebar');
+  if (mc && sidebar) {
+    const sRect = sidebar.getBoundingClientRect();
+    panel.style.left = (sRect.right + 8) + 'px';
+    panel.style.bottom = '12px';
+  }
+}
+
+/* ================================================================
+   DETAIL PANEL
+   ================================================================ */
+function showDetailPanel(nt) {
+  selectedNT = nt;
+  const panel = document.getElementById('detailPanel');
+  document.getElementById('detailTitle').textContent = nt.name;
+  document.getElementById('detailAbbr').textContent = nt.abbreviation;
+
+  const catColor = categoryColors[nt.category] || '#555';
+  const effColor = effectBadgeColor(nt.postsynaptic_effect);
+
+  let html = '<div class="detail-badges">';
+  html += `<span class="detail-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}44">
+    <span class="badge-dot" style="background:${catColor}"></span>${nt.category}</span>`;
+  html += `<span class="detail-badge" style="background:${effColor}22;color:${effColor};border:1px solid ${effColor}44">
+    <span class="badge-dot" style="background:${effColor}"></span>Postsynaptic Effect: ${nt.postsynaptic_effect}</span>`;
+  html += '</div>';
+
+  const sections = [
+    ['Postsynaptic Detail', nt.postsynaptic_detail],
+    ['Precursor / Biosynthetic Pathway', nt.precursor],
+    ['Synthesis Enzyme', nt.synthesis_enzyme],
+    ['Receptor Types', nt.receptor_types],
+    ['Primary Brain Regions', nt.primary_location],
+    ['Behavioral / Functional Roles', nt.behavioral_role],
+    ['Associated Disorders', nt.disorders],
+    ['Key Pharmacological Targets', nt.drugs]
+  ];
+
+  sections.forEach(([label, value]) => {
+    if (value) {
+      html += `<div class="detail-section">
+        <div class="detail-section-label">${label}</div>
+        <div class="detail-section-value">${value}</div>
+      </div>`;
+    }
+  });
+
+  document.getElementById('detailBody').innerHTML = html;
+  panel.classList.add('open');
+}
+
+function hideDetailPanel() {
+  selectedNT = null;
+  document.getElementById('detailPanel').classList.remove('open');
+  // Redraw to remove selection highlight
+  drawWheel(true);
+}
+
+document.getElementById('detailClose').addEventListener('click', hideDetailPanel);
+
+/* ================================================================
+   TOOLTIP
+   ================================================================ */
+const tooltipEl = document.getElementById('tooltip');
+
+function showTooltip(nt, event) {
+  const effColor = effectBadgeColor(nt.postsynaptic_effect);
+  tooltipEl.innerHTML = `
+    <div class="tooltip-name">${nt.name}</div>
+    <div class="tooltip-abbr">${nt.abbreviation}</div>
+    <div class="tooltip-row"><strong>Category:</strong> ${nt.category}</div>
+    <div class="tooltip-row">
+      <strong>Postsynaptic Effect:</strong>
+      <span class="tooltip-badge" style="background:${effColor}">${nt.postsynaptic_effect}</span>
+    </div>`;
+  tooltipEl.classList.add('visible');
+  positionTooltip(event);
+}
+
+function positionTooltip(event) {
+  const tt = tooltipEl;
+  const pad = 14;
+  let x = event.clientX + pad;
+  let y = event.clientY + pad;
+  // Prevent overflow
+  const rect = tt.getBoundingClientRect();
+  if (x + rect.width > window.innerWidth - 10) x = event.clientX - rect.width - pad;
+  if (y + rect.height > window.innerHeight - 10) y = event.clientY - rect.height - pad;
+  tt.style.left = x + 'px';
+  tt.style.top = y + 'px';
+}
+
+function hideTooltip() {
+  tooltipEl.classList.remove('visible');
+}
+
+/* ================================================================
+   THEME TOGGLE
+   ================================================================ */
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+function toggleTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('light-theme', !isDark);
+  document.getElementById('themeIcon').innerHTML = isDark ? '&#9790;' : '&#9728;';
+  document.getElementById('themeLabel').textContent = isDark ? 'Dark' : 'Light';
+  drawWheel(true);
+}
+
+/* ================================================================
+   DRAW WHEEL (D3.js)
+   ================================================================ */
+let svgInitialized = false;
+let introPlayed = false;
+
+function drawWheel(skipAnimation) {
+  const visible = getVisibleNTs();
+  const layout = computeLayout(visible);
+  const { segments, catSegments } = layout;
+
+  const svg = d3.select('#wheelSvg');
+  svg.selectAll('*').remove();
+
+  // Responsive sizing
+  const container = document.getElementById('wheelContainer');
+  const cw = container.clientWidth;
+  const ch = container.clientHeight;
+  const size = Math.min(cw, ch, 950);
+
+  svg
+    .attr('width', size)
+    .attr('height', size)
+    .attr('viewBox', `${-VIEW_SIZE/2} ${-VIEW_SIZE/2} ${VIEW_SIZE} ${VIEW_SIZE}`);
+
+  // Defs: glow filter
+  const defs = svg.append('defs');
+  const glowFilter = defs.append('filter').attr('id', 'glow');
+  glowFilter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'blur');
+  const merge = glowFilter.append('feMerge');
+  merge.append('feMergeNode').attr('in', 'blur');
+  merge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+  const glowStrong = defs.append('filter').attr('id', 'glowStrong');
+  glowStrong.append('feGaussianBlur').attr('stdDeviation', '4').attr('result', 'blur');
+  const merge2 = glowStrong.append('feMerge');
+  merge2.append('feMergeNode').attr('in', 'blur');
+  merge2.append('feMergeNode').attr('in', 'SourceGraphic');
+
+  const masterG = svg.append('g').attr('class', 'wheel-master');
+
+  if (segments.length === 0) {
+    masterG.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '0.35em')
+      .attr('fill', isDark ? '#64748b' : '#94a3b8')
+      .attr('font-size', 16)
+      .attr('font-family', 'Inter, sans-serif')
+      .text('No neurotransmitters match filters');
+    return;
+  }
+
+  // ---- Ring guide circles ----
+  const guideGroup = masterG.append('g').attr('class', 'guides');
+  [R0_OUTER, R1_OUTER, R2_OUTER, R3_OUTER, R4_OUTER].forEach(r => {
+    guideGroup.append('circle')
+      .attr('r', r)
+      .attr('fill', 'none')
+      .attr('stroke', isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)')
+      .attr('stroke-width', 0.5);
+  });
+
+  // Ring label annotations
+  const ringLabels = [
+    { r: (R0_INNER + R0_OUTER) / 2, label: '' },
+    { r: R1_OUTER + 2, label: '' },
+    { r: R2_INNER - 2, label: '' },
+    { r: R3_OUTER + 2, label: '' },
+    { r: R4_OUTER + 2, label: '' }
+  ];
+
+  // ---- RING 0: Categories ----
+  const catArc = d3.arc().innerRadius(R0_INNER).outerRadius(R0_OUTER);
+  const catGroup = masterG.append('g').attr('class', 'ring-categories');
+
+  catSegments.forEach(cs => {
+    const g = catGroup.append('g').attr('class', 'cat-segment');
+
+    g.append('path')
+      .attr('d', catArc({ startAngle: cs.startAngle, endAngle: cs.endAngle }))
+      .attr('fill', cs.color)
+      .attr('fill-opacity', 0.7)
+      .attr('stroke', isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)')
+      .attr('stroke-width', 0.5)
+      .style('cursor', 'pointer')
+      .style('transition', 'fill-opacity 0.3s ease')
+      .on('click', function(event) {
+        event.stopPropagation();
+        // Toggle to show only this category
+        const wasOnlyActive = activeCategories.size === 1 && activeCategories.has(cs.category);
+        if (wasOnlyActive) {
+          activeCategories = new Set(categories);
+        } else {
+          activeCategories = new Set([cs.category]);
+        }
+        // Update filter buttons
+        document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
+          const cat = btn.dataset.category;
+          if (activeCategories.has(cat)) {
+            btn.classList.add('active');
+            btn.classList.remove('inactive');
+          } else {
+            btn.classList.remove('active');
+            btn.classList.add('inactive');
+          }
+        });
+        drawWheel();
+        updateStats();
+      });
+
+    // Category text
+    const span = cs.endAngle - cs.startAngle;
+    if (span > degToRad(12)) {
+      const mid = cs.midAngle;
+      const textR = (R0_INNER + R0_OUTER) / 2;
+      const angle = textAngleDeg(mid);
+      const x = textR * Math.cos(mid - Math.PI / 2);
+      const y = textR * Math.sin(mid - Math.PI / 2);
+      g.append('text')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
+        .attr('fill', '#fff')
+        .attr('font-size', span > degToRad(30) ? 8 : 6.5)
+        .attr('font-weight', 700)
+        .attr('font-family', 'Inter, sans-serif')
+        .attr('letter-spacing', '0.5px')
+        .text(truncateText(cs.category, span > degToRad(25) ? 20 : 10))
+        .style('pointer-events', 'none');
+    }
+  });
+
+  // ---- RING 1: NT Names ----
+  const ntArc = d3.arc().innerRadius(R1_INNER).outerRadius(R1_OUTER);
+  const ntGroup = masterG.append('g').attr('class', 'ring-nt-names');
+
+  segments.forEach(seg => {
+    const catColor = categoryColors[seg.nt.category] || '#555';
+    const g = ntGroup.append('g')
+      .attr('class', 'nt-segment')
+      .attr('data-nt-id', seg.nt.id);
+
+    g.append('path')
+      .attr('d', ntArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
+      .attr('fill', catColor)
+      .attr('fill-opacity', 0.55)
+      .attr('stroke', isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)')
+      .attr('stroke-width', 0.4)
+      .style('cursor', 'pointer')
+      .style('transition', 'fill-opacity 0.2s ease');
+
+    const span = arcWidth(seg.startAngle, seg.endAngle);
+    if (span > 4) {
+      const mid = seg.midAngle;
+      const textR = (R1_INNER + R1_OUTER) / 2;
+      const angle = textAngleDeg(mid);
+      const x = textR * Math.cos(mid - Math.PI / 2);
+      const y = textR * Math.sin(mid - Math.PI / 2);
+      g.append('text')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
+        .attr('fill', '#fff')
+        .attr('font-size', span > 8 ? 7.5 : 6)
+        .attr('font-weight', 600)
+        .attr('font-family', 'Inter, sans-serif')
+        .text(truncateText(seg.nt.abbreviation, span > 10 ? 12 : 6))
+        .style('pointer-events', 'none');
+    }
+  });
+
+  // ---- RING 2: Postsynaptic Effect (color band, no text) ----
+  const effArc = d3.arc().innerRadius(R2_INNER).outerRadius(R2_OUTER);
+  const effGroup = masterG.append('g').attr('class', 'ring-effect');
+
+  segments.forEach(seg => {
+    const effColor = effectBadgeColor(seg.nt.postsynaptic_effect);
+    effGroup.append('path')
+      .attr('d', effArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
+      .attr('fill', effColor)
+      .attr('fill-opacity', 0.7)
+      .attr('stroke', isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.35)')
+      .attr('stroke-width', 0.3)
+      .attr('data-nt-id', seg.nt.id)
+      .style('cursor', 'pointer')
+      .style('transition', 'fill-opacity 0.2s ease');
+  });
+
+  // ---- RING 3: Precursor ----
+  const precArc = d3.arc().innerRadius(R3_INNER).outerRadius(R3_OUTER);
+  const precGroup = masterG.append('g').attr('class', 'ring-precursor');
+
+  segments.forEach(seg => {
+    const catColor = categoryColors[seg.nt.category] || '#555';
+    const fillColor = lightenColor(catColor, 0.15);
+
+    precGroup.append('path')
+      .attr('d', precArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
+      .attr('fill', fillColor)
+      .attr('fill-opacity', 0.35)
+      .attr('stroke', isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)')
+      .attr('stroke-width', 0.3)
+      .attr('data-nt-id', seg.nt.id)
+      .style('cursor', 'pointer')
+      .style('transition', 'fill-opacity 0.2s ease');
+
+    const span = arcWidth(seg.startAngle, seg.endAngle);
+    if (span > 5 && seg.nt.precursor) {
+      const mid = seg.midAngle;
+      const textR = (R3_INNER + R3_OUTER) / 2;
+      const angle = textAngleDeg(mid);
+      const x = textR * Math.cos(mid - Math.PI / 2);
+      const y = textR * Math.sin(mid - Math.PI / 2);
+      precGroup.append('text')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
+        .attr('fill', isDark ? '#cbd5e1' : '#475569')
+        .attr('font-size', span > 10 ? 6.5 : 5)
+        .attr('font-weight', 400)
+        .attr('font-family', 'Inter, sans-serif')
+        .text(truncateText(seg.nt.precursor, span > 15 ? 28 : 14))
+        .style('pointer-events', 'none');
+    }
+  });
+
+  // ---- RING 4: Primary Brain Region ----
+  const locArc = d3.arc().innerRadius(R4_INNER).outerRadius(R4_OUTER);
+  const locGroup = masterG.append('g').attr('class', 'ring-location');
+
+  segments.forEach(seg => {
+    const catColor = categoryColors[seg.nt.category] || '#555';
+    const fillColor = lightenColor(catColor, 0.3);
+
+    locGroup.append('path')
+      .attr('d', locArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
+      .attr('fill', fillColor)
+      .attr('fill-opacity', 0.25)
+      .attr('stroke', isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.25)')
+      .attr('stroke-width', 0.3)
+      .attr('data-nt-id', seg.nt.id)
+      .style('cursor', 'pointer')
+      .style('transition', 'fill-opacity 0.2s ease');
+
+    const span = arcWidth(seg.startAngle, seg.endAngle);
+    if (span > 5 && seg.nt.primary_location) {
+      const mid = seg.midAngle;
+      const textR = (R4_INNER + R4_OUTER) / 2;
+      const angle = textAngleDeg(mid);
+      const x = textR * Math.cos(mid - Math.PI / 2);
+      const y = textR * Math.sin(mid - Math.PI / 2);
+      locGroup.append('text')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
+        .attr('fill', isDark ? '#94a3b8' : '#64748b')
+        .attr('font-size', span > 10 ? 6 : 4.5)
+        .attr('font-weight', 400)
+        .attr('font-family', 'Inter, sans-serif')
+        .text(truncateText(seg.nt.primary_location, span > 15 ? 26 : 12))
+        .style('pointer-events', 'none');
+    }
+  });
+
+  // ---- OUTER LABELS: Behavioral Role ----
+  const labelGroup = masterG.append('g').attr('class', 'outer-labels');
+
+  segments.forEach(seg => {
+    const span = arcWidth(seg.startAngle, seg.endAngle);
+    if (span > 5 && seg.nt.behavioral_role) {
+      const mid = seg.midAngle;
+      const textR = LABEL_RADIUS;
+      // For outer labels, rotate to point outward
+      let angleDeg = (mid * 180 / Math.PI) - 90;
+      let anchor = 'start';
+      if (mid > Math.PI / 2 && mid < 3 * Math.PI / 2) {
+        angleDeg += 180;
+        anchor = 'end';
+      }
+      const x = textR * Math.cos(mid - Math.PI / 2);
+      const y = textR * Math.sin(mid - Math.PI / 2);
+      labelGroup.append('text')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('text-anchor', anchor)
+        .attr('dominant-baseline', 'central')
+        .attr('transform', `rotate(${angleDeg}, ${x}, ${y})`)
+        .attr('fill', isDark ? '#64748b' : '#94a3b8')
+        .attr('font-size', span > 12 ? 5.5 : 4)
+        .attr('font-weight', 400)
+        .attr('font-family', 'Inter, sans-serif')
+        .text(truncateText(seg.nt.behavioral_role, span > 15 ? 40 : 20))
+        .style('pointer-events', 'none')
+        .attr('data-nt-id', seg.nt.id);
+    }
+  });
+
+  // ---- CENTER DECORATION ----
+  const centerGroup = masterG.append('g').attr('class', 'center-deco');
+
+  // Circular text: "NEURO" on top, "TRANSMITTERS" on bottom
+  const centerR = 52;
+  // Top arc
+  const topArcPath = defs.append('path')
+    .attr('id', 'centerTopArc')
+    .attr('d', `M ${-centerR},0 A ${centerR},${centerR} 0 0,1 ${centerR},0`)
+    .attr('fill', 'none');
+
+  centerGroup.append('text')
+    .append('textPath')
+    .attr('href', '#centerTopArc')
+    .attr('startOffset', '50%')
+    .attr('text-anchor', 'middle')
+    .attr('fill', isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)')
+    .attr('font-size', 8)
+    .attr('font-weight', 800)
+    .attr('font-family', 'Inter, sans-serif')
+    .attr('letter-spacing', '3px')
+    .text('NEURO');
+
+  // Bottom arc
+  const botArcPath = defs.append('path')
+    .attr('id', 'centerBotArc')
+    .attr('d', `M ${centerR},0 A ${centerR},${centerR} 0 0,1 ${-centerR},0`)
+    .attr('fill', 'none');
+
+  centerGroup.append('text')
+    .append('textPath')
+    .attr('href', '#centerBotArc')
+    .attr('startOffset', '50%')
+    .attr('text-anchor', 'middle')
+    .attr('fill', isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)')
+    .attr('font-size', 6.5)
+    .attr('font-weight', 800)
+    .attr('font-family', 'Inter, sans-serif')
+    .attr('letter-spacing', '2px')
+    .text('TRANSMITTERS');
+
+  // Small neuron-like decoration at center
+  centerGroup.append('circle')
+    .attr('cx', 0).attr('cy', 0).attr('r', 18)
+    .attr('fill', 'none')
+    .attr('stroke', isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
+    .attr('stroke-width', 1);
+  centerGroup.append('circle')
+    .attr('cx', 0).attr('cy', 0).attr('r', 6)
+    .attr('fill', isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)')
+    .attr('stroke', isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')
+    .attr('stroke-width', 0.5);
+  // Dendrite-like lines from center
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2;
+    centerGroup.append('line')
+      .attr('x1', 6 * Math.cos(a)).attr('y1', 6 * Math.sin(a))
+      .attr('x2', 16 * Math.cos(a)).attr('y2', 16 * Math.sin(a))
+      .attr('stroke', isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)')
+      .attr('stroke-width', 0.8);
+  }
+
+  // ---- Ring label annotations (between rings) ----
+  const ringLabelData = [
+    { r: R1_INNER - 4, label: 'NT NAME' },
+    { r: R2_INNER - 4, label: 'POSTSYNAPTIC EFFECT' },
+    { r: R3_INNER - 4, label: 'PRECURSOR' },
+    { r: R4_INNER - 4, label: 'BRAIN REGION' }
+  ];
+
+  ringLabelData.forEach(rl => {
+    const labelArc = defs.append('path')
+      .attr('id', 'ringLabel_' + rl.r)
+      .attr('d', `M ${-rl.r},0 A ${rl.r},${rl.r} 0 0,1 ${rl.r},0`)
+      .attr('fill', 'none');
+
+    masterG.append('text')
+      .attr('class', 'ring-label-text')
+      .append('textPath')
+      .attr('href', '#ringLabel_' + rl.r)
+      .attr('startOffset', '50%')
+      .attr('text-anchor', 'middle')
+      .attr('fill', isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)')
+      .attr('font-size', 5)
+      .attr('font-weight', 700)
+      .attr('font-family', 'Inter, sans-serif')
+      .attr('letter-spacing', '1.5px')
+      .text(rl.label);
+  });
+
+  // ---- INTERACTION OVERLAY (transparent arcs for hover/click) ----
+  const interGroup = masterG.append('g').attr('class', 'interaction-layer');
+  const fullArc = d3.arc().innerRadius(R0_INNER).outerRadius(R4_OUTER + 20);
+
+  segments.forEach(seg => {
+    interGroup.append('path')
+      .attr('d', fullArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
+      .attr('fill', 'transparent')
+      .attr('stroke', 'none')
+      .style('cursor', 'pointer')
+      .attr('data-nt-id', seg.nt.id)
+      .on('mouseenter', function(event) {
+        hoveredNT = seg.nt;
+        highlightNT(seg.nt.id);
+        showTooltip(seg.nt, event);
+      })
+      .on('mousemove', function(event) {
+        positionTooltip(event);
+      })
+      .on('mouseleave', function() {
+        hoveredNT = null;
+        clearHighlight();
+        hideTooltip();
+      })
+      .on('click', function(event) {
+        event.stopPropagation();
+        showDetailPanel(seg.nt);
+        highlightNT(seg.nt.id, true);
+      });
+  });
+
+  // ---- Highlight for selected NT ----
+  if (selectedNT && !skipAnimation) {
+    const selSeg = segments.find(s => s.nt.id === selectedNT.id);
+    if (selSeg) {
+      highlightNT(selectedNT.id, true);
+    }
+  }
+
+  // ---- Animated intro ----
+  if (!introPlayed && !skipAnimation) {
+    introPlayed = true;
+    animateIntro(masterG);
+  }
+}
+
+/* ================================================================
+   HIGHLIGHT / DIM
+   ================================================================ */
+function highlightNT(ntId, locked) {
+  const svg = d3.select('#wheelSvg');
+
+  // Dim all segments
+  svg.selectAll('.ring-nt-names path, .ring-effect path, .ring-precursor path, .ring-location path')
+    .transition().duration(150)
+    .attr('fill-opacity', function() {
+      return +this.getAttribute('data-nt-id') === ntId ||
+             this.closest('.nt-segment')?.getAttribute('data-nt-id') == ntId
+        ? null : 0.12;
+    });
+
+  // Handle NT name segments specifically
+  svg.selectAll('.nt-segment').each(function() {
+    const g = d3.select(this);
+    const id = +g.attr('data-nt-id');
+    const path = g.select('path');
+    if (id === ntId) {
+      path.transition().duration(150).attr('fill-opacity', 0.9);
+      path.attr('filter', 'url(#glow)');
+    } else {
+      path.transition().duration(150).attr('fill-opacity', 0.12);
+      path.attr('filter', null);
+    }
+  });
+
+  // Ring 2, 3, 4 segments with data-nt-id
+  svg.selectAll('.ring-effect path, .ring-precursor path, .ring-location path').each(function() {
+    const el = d3.select(this);
+    const id = +el.attr('data-nt-id');
+    if (id === ntId) {
+      el.transition().duration(150).attr('fill-opacity', 0.85);
+      el.attr('filter', 'url(#glow)');
+    } else {
+      el.transition().duration(150).attr('fill-opacity', 0.1);
+      el.attr('filter', null);
+    }
+  });
+
+  // Outer labels
+  svg.selectAll('.outer-labels text').each(function() {
+    const el = d3.select(this);
+    const id = +el.attr('data-nt-id');
+    el.transition().duration(150).attr('fill-opacity', id === ntId ? 1 : 0.15);
+  });
+
+  // Category ring: dim categories not matching
+  const matchNT = ntData.find(n => n.id === ntId);
+  if (matchNT) {
+    svg.selectAll('.cat-segment path').each(function(d, i) {
+      // We can't easily get category from the path, so dim all to lighter
+      d3.select(this).transition().duration(150).attr('fill-opacity', 0.3);
+    });
+  }
+}
+
+function clearHighlight() {
+  if (selectedNT) return; // Don't clear if something is locked
+
+  const svg = d3.select('#wheelSvg');
+
+  svg.selectAll('.nt-segment path')
+    .transition().duration(200)
+    .attr('fill-opacity', 0.55)
+    .attr('filter', null);
+
+  svg.selectAll('.ring-effect path')
+    .transition().duration(200)
+    .attr('fill-opacity', 0.7)
+    .attr('filter', null);
+
+  svg.selectAll('.ring-precursor path')
+    .transition().duration(200)
+    .attr('fill-opacity', 0.35)
+    .attr('filter', null);
+
+  svg.selectAll('.ring-location path')
+    .transition().duration(200)
+    .attr('fill-opacity', 0.25)
+    .attr('filter', null);
+
+  svg.selectAll('.outer-labels text')
+    .transition().duration(200)
+    .attr('fill-opacity', 1);
+
+  svg.selectAll('.cat-segment path')
+    .transition().duration(200)
+    .attr('fill-opacity', 0.7);
+}
+
+/* ================================================================
+   ANIMATED INTRO
+   ================================================================ */
+function animateIntro(masterG) {
+  const ringClasses = [
+    '.ring-categories',
+    '.ring-nt-names',
+    '.ring-effect',
+    '.ring-precursor',
+    '.ring-location',
+    '.outer-labels'
+  ];
+
+  ringClasses.forEach((cls, i) => {
+    const group = masterG.select(cls);
+    if (group.empty()) return;
+
+    group
+      .attr('opacity', 0)
+      .attr('transform', 'scale(0.7)')
+      .transition()
+      .delay(i * 120)
+      .duration(500)
+      .ease(d3.easeCubicOut)
+      .attr('opacity', 1)
+      .attr('transform', 'scale(1)');
+  });
+
+  // Center decoration fades in
+  masterG.select('.center-deco')
+    .attr('opacity', 0)
+    .transition()
+    .delay(50)
+    .duration(600)
+    .attr('opacity', 1);
+
+  // Ring labels fade in
+  masterG.selectAll('.ring-label-text')
+    .attr('opacity', 0)
+    .transition()
+    .delay(600)
+    .duration(400)
+    .attr('opacity', 1);
+}
+
+/* ================================================================
+   CLICK OUTSIDE TO DESELECT
+   ================================================================ */
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('detailPanel');
+  const sidebar = document.getElementById('leftSidebar');
+  if (selectedNT &&
+      !panel.contains(e.target) &&
+      !sidebar.contains(e.target) &&
+      !e.target.closest('.interaction-layer') &&
+      !e.target.closest('.cat-segment')) {
+    hideDetailPanel();
+  }
+});
+
+/* ================================================================
+   WINDOW RESIZE
+   ================================================================ */
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => drawWheel(true), 150);
+});
+
+/* ================================================================
+   INITIALIZATION
+   ================================================================ */
+function init() {
+  buildFilters();
+  updateStats();
+  buildLegend();
+  drawWheel();
+}
+
+// Wait for fonts to load
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(init);
+} else {
+  window.addEventListener('load', init);
+}
+</script>
+</body>
+</html>
