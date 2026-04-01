@@ -6,180 +6,94 @@
 <title>Neurotransmitter Wheel Chart</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
-/* ================================================================
-   ROOT & RESET
-   ================================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-panel: rgba(18, 18, 30, 0.85);
-  --bg-card: rgba(25, 25, 40, 0.7);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(100, 140, 255, 0.15);
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent-blue: #3b82f6;
-  --glow-spread: 0 0 20px rgba(59, 130, 246, 0.15);
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-
-.light-theme {
-  --bg-primary: #f0f2f5;
-  --bg-secondary: #ffffff;
-  --bg-panel: rgba(255, 255, 255, 0.92);
-  --bg-card: rgba(240, 242, 245, 0.8);
-  --border-color: rgba(0, 0, 0, 0.1);
-  --border-glow: rgba(59, 130, 246, 0.2);
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --glow-spread: 0 0 20px rgba(59, 130, 246, 0.1);
+  --bg: #f5f5f5;
+  --bg-panel: #fff;
+  --border: #ddd;
+  --text: #222;
+  --text-dim: #888;
+  --font: 'Inter', sans-serif;
 }
 
 html, body {
   height: 100%;
   overflow: hidden;
   font-family: var(--font);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background 0.4s ease, color 0.4s ease;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* ================================================================
-   LAYOUT
-   ================================================================ */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
+/* LAYOUT */
+.app { display: flex; flex-direction: column; height: 100vh; }
 
-.app-header {
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 24px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
   flex-shrink: 0;
-  z-index: 100;
-  backdrop-filter: blur(12px);
-  min-height: 52px;
 }
 
-.app-header h1 {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #3b82f6, #c026d3, #10b981);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  white-space: nowrap;
-}
+.header h1 { font-size: 14px; font-weight: 600; letter-spacing: 1px; }
 
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.search-wrapper {
-  position: relative;
-}
+.header-controls { display: flex; align-items: center; gap: 10px; }
 
 .search-input {
-  width: 220px;
-  padding: 7px 14px 7px 34px;
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  background: var(--bg-card);
-  color: var(--text-primary);
+  width: 200px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font);
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.search-input:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
-}
-
-.search-icon {
-  position: absolute;
-  left: 11px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  font-size: 13px;
-  pointer-events: none;
-}
-
-.theme-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 5px 12px;
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
-  color: var(--text-secondary);
   font-size: 12px;
+  outline: none;
+}
+.search-input:focus { border-color: #555; }
+
+.theme-btn, .zoom-btn {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-dim);
   font-family: var(--font);
-  transition: all 0.3s ease;
+  font-size: 11px;
+  cursor: pointer;
 }
+.theme-btn:hover, .zoom-btn:hover { color: var(--text); border-color: #555; }
 
-.theme-toggle:hover {
-  border-color: var(--accent-blue);
-  color: var(--text-primary);
-}
+.main { display: flex; flex: 1; overflow: hidden; }
 
-.main-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-
-/* ================================================================
-   LEFT SIDEBAR
-   ================================================================ */
-.left-sidebar {
-  width: 240px;
-  min-width: 240px;
-  padding: 14px;
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  padding: 12px;
   overflow-y: auto;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-color);
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  backdrop-filter: blur(12px);
-  z-index: 10;
+  gap: 12px;
 }
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); }
 
-.left-sidebar::-webkit-scrollbar { width: 4px; }
-.left-sidebar::-webkit-scrollbar-track { background: transparent; }
-.left-sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
-
-.filter-section h3 {
-  font-size: 10px;
+.section-title {
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
 }
 
 .filter-btn {
@@ -187,119 +101,50 @@ html, body {
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 10px;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 4px;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text);
   font-family: var(--font);
   font-size: 11px;
   cursor: pointer;
-  transition: all 0.25s ease;
   text-align: left;
 }
-
-.filter-btn:hover {
-  background: var(--bg-card);
-  color: var(--text-primary);
-}
-
-.filter-btn.active {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border-color: var(--border-glow);
-}
-
-.filter-btn.inactive {
-  opacity: 0.35;
-}
+.filter-btn:hover { background: var(--border); }
+.filter-btn.inactive { opacity: 0.3; }
 
 .filter-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 6px currentColor;
 }
 
-.filter-label {
-  flex: 1;
-  line-height: 1.3;
-}
-
-.filter-count {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 600;
-}
+.filter-count { margin-left: auto; font-size: 10px; color: var(--text-dim); }
 
 .reset-btn {
   width: 100%;
-  padding: 7px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-card);
-  color: var(--text-secondary);
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
   font-family: var(--font);
   font-size: 11px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
-  letter-spacing: 0.5px;
 }
+.reset-btn:hover { color: var(--text); border-color: #555; }
 
-.reset-btn:hover {
-  border-color: var(--accent-blue);
-  color: var(--text-primary);
-  box-shadow: var(--glow-spread);
-}
+/* STATS */
+.stats { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px; }
+.stat-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 11px; }
+.stat-label { color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+.stat-value { font-weight: 600; }
+.stat-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
 
-/* ================================================================
-   STATS PANEL
-   ================================================================ */
-.stats-panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.stats-panel h3 {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 3px 0;
-  font-size: 11px;
-}
-
-.stat-label {
-  color: var(--text-secondary);
-}
-
-.stat-value {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.stat-divider {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin: 6px 0;
-}
-
-/* ================================================================
-   WHEEL CONTAINER
-   ================================================================ */
-.wheel-container {
+/* WHEEL */
+.wheel-area {
   flex: 1;
   display: flex;
   align-items: center;
@@ -308,319 +153,154 @@ html, body {
   position: relative;
   min-width: 0;
 }
+.wheel-area svg { display: block; }
 
-.wheel-container svg {
-  max-width: 100%;
-  max-height: 100%;
+.zoom-controls {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 20;
 }
 
-/* ================================================================
-   TOOLTIP
-   ================================================================ */
+/* TOOLTIP */
 .tooltip {
   position: fixed;
   pointer-events: none;
   background: var(--bg-panel);
-  border: 1px solid var(--border-glow);
-  border-radius: 10px;
-  padding: 12px 16px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
   z-index: 9999;
   opacity: 0;
-  transition: opacity 0.15s ease;
-  max-width: 320px;
+  max-width: 340px;
   font-size: 12px;
+  line-height: 1.5;
 }
-
 .tooltip.visible { opacity: 1; }
-
-.tooltip-name {
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: var(--text-primary);
-}
-
-.tooltip-abbr {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.tooltip-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
+.tooltip-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.tooltip-abbr { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
+.tooltip-row { margin-top: 3px; color: var(--text-dim); font-size: 11px; }
+.tooltip-row strong { color: var(--text); }
 .tooltip-badge {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
   font-size: 10px;
   font-weight: 600;
   color: #fff;
 }
 
-/* ================================================================
-   DETAIL PANEL (RIGHT SIDEBAR)
-   ================================================================ */
+/* DETAIL PANEL */
 .detail-panel {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 360px;
+  top: 0; right: 0;
+  width: 340px;
   height: 100%;
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border-color);
-  backdrop-filter: blur(16px);
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
   z-index: 50;
   transform: translateX(100%);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s ease;
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 24px rgba(0,0,0,0.3);
 }
-
-.detail-panel.open {
-  transform: translateX(0);
-}
+.detail-panel.open { transform: translateX(0); }
 
 .detail-header {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  padding: 18px 20px 14px;
-  border-bottom: 1px solid var(--border-color);
+  align-items: flex-start;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-
-.detail-title {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.detail-abbr {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
+.detail-title { font-size: 16px; font-weight: 700; }
+.detail-abbr { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 .detail-close {
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-size: 16px;
+  width: 24px; height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-  margin-left: 12px;
 }
-
-.detail-close:hover {
-  border-color: #ef4444;
-  color: #ef4444;
-}
+.detail-close:hover { color: var(--text); }
 
 .detail-body {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 20px 24px;
+  padding: 12px 16px 20px;
 }
+.detail-body::-webkit-scrollbar { width: 3px; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--border); }
 
-.detail-body::-webkit-scrollbar { width: 4px; }
-.detail-body::-webkit-scrollbar-track { background: transparent; }
-.detail-body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
-
-.detail-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
+.detail-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .detail-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
   font-weight: 600;
 }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-.detail-badge .badge-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.detail-section {
-  margin-bottom: 14px;
-}
-
+.detail-section { margin-bottom: 12px; }
 .detail-section-label {
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 1.2px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 4px;
+  color: var(--text-dim);
+  margin-bottom: 3px;
 }
-
-.detail-section-value {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-/* ================================================================
-   LEGEND
-   ================================================================ */
-.legend-panel {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 10px 14px;
-  backdrop-filter: blur(12px);
-  z-index: 20;
-  font-size: 10px;
-  max-width: 220px;
-}
-
-.legend-panel h4 {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 0;
-  color: var(--text-secondary);
-}
-
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.legend-divider {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin: 6px 0;
-}
-
-/* ================================================================
-   RING LABELS
-   ================================================================ */
-.ring-label-text {
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  fill: var(--text-muted);
-  opacity: 0.5;
-}
-
-/* ================================================================
-   ANIMATIONS
-   ================================================================ */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.left-sidebar > * {
-  animation: fadeIn 0.4s ease forwards;
-}
-
-/* ================================================================
-   RESPONSIVE
-   ================================================================ */
-@media (max-width: 900px) {
-  .left-sidebar { width: 200px; min-width: 200px; }
-  .detail-panel { width: 300px; }
-}
+.detail-section-value { font-size: 12px; color: var(--text); line-height: 1.5; }
 
 @media (max-width: 700px) {
-  .left-sidebar { display: none; }
+  .sidebar { display: none; }
   .detail-panel { width: 100%; }
 }
 </style>
 </head>
 <body>
-
-<div class="app-container" id="app">
-  <!-- HEADER -->
-  <header class="app-header">
-    <h1>Neurotransmitter Wheel</h1>
+<div class="app">
+  <header class="header">
+    <h1>NEUROTRANSMITTER WHEEL</h1>
     <div class="header-controls">
-      <div class="search-wrapper">
-        <span class="search-icon">&#128269;</span>
-        <input type="text" class="search-input" id="searchInput" placeholder="Search neurotransmitters..." autocomplete="off">
-      </div>
-      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span id="themeIcon">&#9790;</span>
-        <span id="themeLabel">Dark</span>
-      </button>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search..." autocomplete="off">
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
-  <div class="main-content">
-    <!-- LEFT SIDEBAR -->
-    <aside class="left-sidebar" id="leftSidebar">
-      <!-- Category Filters -->
-      <div class="filter-section" id="categoryFilters">
-        <h3>Categories</h3>
-      </div>
-
-      <!-- Effect Filters -->
-      <div class="filter-section" id="effectFilters">
-        <h3>Postsynaptic Effect</h3>
-      </div>
-
-      <!-- Reset -->
+  <div class="main">
+    <aside class="sidebar" id="sidebar">
+      <div id="categoryFilters"><div class="section-title">Categories</div></div>
+      <div id="effectFilters"><div class="section-title">Postsynaptic Effect</div></div>
       <button class="reset-btn" id="resetBtn">Show All</button>
-
-      <!-- Stats -->
-      <div class="stats-panel" id="statsPanel">
-        <h3>Statistics</h3>
+      <div class="stats" id="statsPanel">
+        <div class="section-title">Statistics</div>
         <div id="statsContent"></div>
       </div>
     </aside>
 
-    <!-- WHEEL -->
-    <div class="wheel-container" id="wheelContainer">
+    <div class="wheel-area" id="wheelArea">
       <svg id="wheelSvg"></svg>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomIn" title="Zoom in">+</button>
+        <button class="zoom-btn" id="zoomOut" title="Zoom out">&minus;</button>
+        <button class="zoom-btn" id="zoomReset" title="Reset zoom">&#8634;</button>
+      </div>
     </div>
 
-    <!-- TOOLTIP -->
     <div class="tooltip" id="tooltip"></div>
 
-    <!-- DETAIL PANEL -->
     <div class="detail-panel" id="detailPanel">
       <div class="detail-header">
         <div>
@@ -634,1040 +314,504 @@ html, body {
   </div>
 </div>
 
-<!-- LEGEND (absolute positioned over wheel area) -->
-<div class="legend-panel" id="legendPanel" style="display:none;"></div>
-
 <script>
-/* ================================================================
-   DATA FROM FLASK / JINJA2
-   ================================================================ */
+/* DATA */
 const ntData = {{ nt_data | tojson | safe }};
 const categoryColors = {{ category_colors | tojson | safe }};
 const effectColors = {{ effect_colors | tojson | safe }};
 const categories = {{ categories | tojson | safe }};
 
-/* ================================================================
-   STATE
-   ================================================================ */
+/* STATE */
 let activeCategories = new Set(categories);
 let activeEffects = new Set(Object.keys(effectColors));
 let selectedNT = null;
-let hoveredNT = null;
 let searchTerm = '';
-let isDark = true;
+let hoverOutTimer = null;
 
-/* ================================================================
-   RING RADII
-   ================================================================ */
-const R0_INNER = 0, R0_OUTER = 80;
-const R1_INNER = 82, R1_OUTER = 170;
-const R2_INNER = 172, R2_OUTER = 200;
-const R3_INNER = 202, R3_OUTER = 270;
-const R4_INNER = 272, R4_OUTER = 340;
-const LABEL_RADIUS = 355;
-const VIEW_SIZE = 900;
-const PAD_ANGLE = 0.005;
-const CAT_PAD = 0.012;
+/* RING RADII — scaled for VIEW=1000 so text renders large on screen */
+const R0_IN = 0,   R0_OUT = 105;
+const R1_IN = 110, R1_OUT = 235;
+const R2_IN = 239, R2_OUT = 265;
+const R3_IN = 269, R3_OUT = 355;
+const R4_IN = 359, R4_OUT = 440;
+const VIEW = 900;
+const PAD = 0.006;
+const CAT_PAD = 0.014;
 
-/* ================================================================
-   HELPERS
-   ================================================================ */
-function degToRad(d) { return d * Math.PI / 180; }
-
-function getVisibleNTs() {
-  let data = ntData.filter(nt =>
-    activeCategories.has(nt.category) &&
-    activeEffects.has(nt.postsynaptic_effect)
-  );
+/* HELPERS */
+function getVisible() {
+  let d = ntData.filter(n => activeCategories.has(n.category) && activeEffects.has(n.postsynaptic_effect));
   if (searchTerm) {
-    const term = searchTerm.toLowerCase();
-    data = data.filter(nt =>
-      nt.name.toLowerCase().includes(term) ||
-      nt.abbreviation.toLowerCase().includes(term)
-    );
+    const t = searchTerm.toLowerCase();
+    d = d.filter(n => n.name.toLowerCase().includes(t) || n.abbreviation.toLowerCase().includes(t));
   }
-  return data.sort((a, b) => {
+  return d.sort((a, b) => {
     const ci = categories.indexOf(a.category) - categories.indexOf(b.category);
-    if (ci !== 0) return ci;
-    return a.id - b.id;
+    return ci !== 0 ? ci : a.id - b.id;
   });
-}
-
-function groupByCategory(data) {
-  const groups = [];
-  const catMap = new Map();
-  data.forEach(nt => {
-    if (!catMap.has(nt.category)) {
-      const g = { category: nt.category, nts: [] };
-      catMap.set(nt.category, g);
-      groups.push(g);
-    }
-    catMap.get(nt.category).nts.push(nt);
-  });
-  // Sort groups by canonical category order
-  groups.sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category));
-  return groups;
 }
 
 function computeLayout(data) {
-  const groups = groupByCategory(data);
+  const groups = [];
+  const map = new Map();
+  data.forEach(n => {
+    if (!map.has(n.category)) { const g = { category: n.category, nts: [] }; map.set(n.category, g); groups.push(g); }
+    map.get(n.category).nts.push(n);
+  });
+  groups.sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category));
+
   const N = data.length;
-  if (N === 0) return { segments: [], catSegments: [] };
+  if (N === 0) return { segs: [], cats: [] };
+  const angle = 2 * Math.PI / N;
+  const segs = [], cats = [];
+  let cur = 0;
 
-  const totalAngle = 2 * Math.PI;
-  const anglePerNT = totalAngle / N;
-  const segments = [];
-  const catSegments = [];
-  let cursor = 0;
-
-  groups.forEach(group => {
-    const catStart = cursor;
-    group.nts.forEach(nt => {
-      segments.push({
-        nt: nt,
-        startAngle: cursor + PAD_ANGLE / 2,
-        endAngle: cursor + anglePerNT - PAD_ANGLE / 2,
-        midAngle: cursor + anglePerNT / 2
-      });
-      cursor += anglePerNT;
+  groups.forEach(g => {
+    const start = cur;
+    g.nts.forEach(nt => {
+      segs.push({ nt, s: cur + PAD / 2, e: cur + angle - PAD / 2, m: cur + angle / 2 });
+      cur += angle;
     });
-    catSegments.push({
-      category: group.category,
-      color: categoryColors[group.category] || '#555',
-      startAngle: catStart + CAT_PAD / 2,
-      endAngle: cursor - CAT_PAD / 2,
-      midAngle: (catStart + cursor) / 2,
-      count: group.nts.length
-    });
+    cats.push({ cat: g.category, color: categoryColors[g.category] || '#555', s: start + CAT_PAD / 2, e: cur - CAT_PAD / 2, m: (start + cur) / 2, n: g.nts.length });
   });
-
-  return { segments, catSegments };
+  return { segs, cats };
 }
 
-function clampAngle(a) {
-  while (a < 0) a += 2 * Math.PI;
-  while (a >= 2 * Math.PI) a -= 2 * Math.PI;
-  return a;
+function arcDeg(s, e) { return (e - s) * 180 / Math.PI; }
+
+function textRot(mid) {
+  // Convert to degrees, offset so 0 = pointing right along radius
+  let d = mid * 180 / Math.PI - 90;
+  // Normalize to -180..180
+  while (d > 180) d -= 360;
+  while (d < -180) d += 360;
+  // Keep between -90..90 so text is NEVER upside down
+  if (d > 90) d -= 180;
+  if (d < -90) d += 180;
+  return d;
 }
 
-function textAngleDeg(midAngle) {
-  let deg = (midAngle * 180 / Math.PI) - 90;
-  // Flip text on bottom half so it reads left-to-right
-  if (midAngle > Math.PI / 2 && midAngle < 3 * Math.PI / 2) {
-    deg += 180;
-  }
-  return deg;
-}
+function trunc(t, max) { return !t ? '' : t.length > max ? t.slice(0, max - 1) + '\u2026' : t; }
 
-function arcWidth(startAngle, endAngle) {
-  return (endAngle - startAngle) * 180 / Math.PI;
-}
-
-function effectBadgeColor(effect) {
-  return effectColors[effect] || '#888';
-}
-
-function lightenColor(hex, pct) {
-  let r = parseInt(hex.slice(1,3), 16);
-  let g = parseInt(hex.slice(3,5), 16);
-  let b = parseInt(hex.slice(5,7), 16);
-  r = Math.min(255, r + Math.round((255 - r) * pct));
-  g = Math.min(255, g + Math.round((255 - g) * pct));
-  b = Math.min(255, b + Math.round((255 - b) * pct));
+function lighten(hex, p) {
+  let [r, g, b] = [1,3,5].map(i => parseInt(hex.slice(i, i+2), 16));
+  r = Math.min(255, r + Math.round((255 - r) * p));
+  g = Math.min(255, g + Math.round((255 - g) * p));
+  b = Math.min(255, b + Math.round((255 - b) * p));
   return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
 }
 
-function darkenColor(hex, pct) {
-  let r = parseInt(hex.slice(1,3), 16);
-  let g = parseInt(hex.slice(3,5), 16);
-  let b = parseInt(hex.slice(5,7), 16);
-  r = Math.max(0, Math.round(r * (1 - pct)));
-  g = Math.max(0, Math.round(g * (1 - pct)));
-  b = Math.max(0, Math.round(b * (1 - pct)));
+function darken(hex, p) {
+  let [r, g, b] = [1,3,5].map(i => parseInt(hex.slice(i, i+2), 16));
+  r = Math.max(0, Math.round(r * (1 - p)));
+  g = Math.max(0, Math.round(g * (1 - p)));
+  b = Math.max(0, Math.round(b * (1 - p)));
   return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
 }
 
-function truncateText(text, maxLen) {
-  if (!text) return '';
-  return text.length > maxLen ? text.substring(0, maxLen - 1) + '\u2026' : text;
+/* Light-mode opacity and stroke helpers */
+function segStroke() { return '#999'; }
+function catOpacity() { return 0.85; }
+function ntOpacity() { return 0.75; }
+function effOpacity() { return 0.85; }
+function precOpacity() { return 0.55; }
+function locOpacity() { return 0.45; }
+function ringColor(hex, ring) {
+  if (ring === 3) return darken(hex, 0.1);
+  if (ring === 4) return darken(hex, 0.2);
+  return darken(hex, 0.05);
 }
 
-/* ================================================================
-   BUILD FILTERS
-   ================================================================ */
+/* FILTERS */
 function buildFilters() {
-  const catContainer = document.getElementById('categoryFilters');
-  // Keep the h3
-  const catBtns = catContainer.querySelectorAll('.filter-btn');
-  catBtns.forEach(b => b.remove());
-
+  const catC = document.getElementById('categoryFilters');
+  catC.querySelectorAll('.filter-btn').forEach(b => b.remove());
   categories.forEach(cat => {
-    const count = ntData.filter(n => n.category === cat).length;
+    const c = ntData.filter(n => n.category === cat).length;
     const btn = document.createElement('button');
-    btn.className = 'filter-btn active';
+    btn.className = 'filter-btn';
     btn.dataset.category = cat;
-    btn.innerHTML = `<span class="filter-dot" style="background:${categoryColors[cat]};box-shadow:0 0 6px ${categoryColors[cat]}"></span>
-      <span class="filter-label">${cat}</span>
-      <span class="filter-count">${count}</span>`;
-    btn.addEventListener('click', () => toggleCategoryFilter(cat, btn));
-    catContainer.appendChild(btn);
+    btn.innerHTML = `<span class="filter-dot" style="background:${categoryColors[cat]}"></span><span>${cat}</span><span class="filter-count">${c}</span>`;
+    btn.onclick = () => { toggleCat(cat, btn); };
+    catC.appendChild(btn);
   });
 
-  const effContainer = document.getElementById('effectFilters');
-  const effBtns = effContainer.querySelectorAll('.filter-btn');
-  effBtns.forEach(b => b.remove());
-
+  const effC = document.getElementById('effectFilters');
+  effC.querySelectorAll('.filter-btn').forEach(b => b.remove());
   Object.keys(effectColors).forEach(eff => {
-    const count = ntData.filter(n => n.postsynaptic_effect === eff).length;
+    const c = ntData.filter(n => n.postsynaptic_effect === eff).length;
     const btn = document.createElement('button');
-    btn.className = 'filter-btn active';
+    btn.className = 'filter-btn';
     btn.dataset.effect = eff;
-    btn.innerHTML = `<span class="filter-dot" style="background:${effectColors[eff]};box-shadow:0 0 6px ${effectColors[eff]}"></span>
-      <span class="filter-label">Postsynaptic Effect: ${eff}</span>
-      <span class="filter-count">${count}</span>`;
-    btn.addEventListener('click', () => toggleEffectFilter(eff, btn));
-    effContainer.appendChild(btn);
+    btn.innerHTML = `<span class="filter-dot" style="background:${effectColors[eff]}"></span><span>Postsynaptic Effect: ${eff}</span><span class="filter-count">${c}</span>`;
+    btn.onclick = () => { toggleEff(eff, btn); };
+    effC.appendChild(btn);
   });
 }
 
-function toggleCategoryFilter(cat, btn) {
-  if (activeCategories.has(cat)) {
-    activeCategories.delete(cat);
-    btn.classList.remove('active');
-    btn.classList.add('inactive');
-  } else {
-    activeCategories.add(cat);
-    btn.classList.add('active');
-    btn.classList.remove('inactive');
-  }
-  drawWheel();
-  updateStats();
+function toggleCat(cat, btn) {
+  if (activeCategories.has(cat)) { activeCategories.delete(cat); btn.classList.add('inactive'); }
+  else { activeCategories.add(cat); btn.classList.remove('inactive'); }
+  redraw();
 }
 
-function toggleEffectFilter(eff, btn) {
-  if (activeEffects.has(eff)) {
-    activeEffects.delete(eff);
-    btn.classList.remove('active');
-    btn.classList.add('inactive');
-  } else {
-    activeEffects.add(eff);
-    btn.classList.add('active');
-    btn.classList.remove('inactive');
-  }
-  drawWheel();
-  updateStats();
+function toggleEff(eff, btn) {
+  if (activeEffects.has(eff)) { activeEffects.delete(eff); btn.classList.add('inactive'); }
+  else { activeEffects.add(eff); btn.classList.remove('inactive'); }
+  redraw();
 }
 
-document.getElementById('resetBtn').addEventListener('click', () => {
+document.getElementById('resetBtn').onclick = () => {
   activeCategories = new Set(categories);
   activeEffects = new Set(Object.keys(effectColors));
   searchTerm = '';
   document.getElementById('searchInput').value = '';
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.add('active');
-    b.classList.remove('inactive');
-  });
-  hideDetailPanel();
-  drawWheel();
-  updateStats();
-});
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('inactive'));
+  hideDetail();
+  redraw();
+};
 
-/* ================================================================
-   SEARCH
-   ================================================================ */
 document.getElementById('searchInput').addEventListener('input', function() {
   searchTerm = this.value.trim();
-  drawWheel();
-  updateStats();
+  redraw();
 });
 
-/* ================================================================
-   STATS
-   ================================================================ */
+function redraw() { drawWheel(); updateStats(); }
+
+/* STATS */
 function updateStats() {
-  const visible = getVisibleNTs();
-  const total = visible.length;
-
-  let html = `<div class="stat-row"><span class="stat-label">Visible</span><span class="stat-value">${total} / ${ntData.length}</span></div>`;
-  html += '<hr class="stat-divider">';
-
-  // By effect
-  Object.keys(effectColors).forEach(eff => {
-    const c = visible.filter(n => n.postsynaptic_effect === eff).length;
-    html += `<div class="stat-row">
-      <span class="stat-label" style="display:flex;align-items:center;gap:4px">
-        <span style="width:6px;height:6px;border-radius:50%;background:${effectColors[eff]};display:inline-block"></span>
-        ${eff}
-      </span>
-      <span class="stat-value">${c}</span>
-    </div>`;
+  const vis = getVisible();
+  let h = `<div class="stat-row"><span class="stat-label">Visible</span><span class="stat-value">${vis.length} / ${ntData.length}</span></div><hr class="stat-divider">`;
+  Object.keys(effectColors).forEach(e => {
+    const c = vis.filter(n => n.postsynaptic_effect === e).length;
+    h += `<div class="stat-row"><span class="stat-label"><span style="width:6px;height:6px;border-radius:50%;background:${effectColors[e]};display:inline-block"></span> ${e}</span><span class="stat-value">${c}</span></div>`;
   });
-
-  html += '<hr class="stat-divider">';
-
-  // By category
+  h += '<hr class="stat-divider">';
   categories.forEach(cat => {
-    const c = visible.filter(n => n.category === cat).length;
-    if (c > 0) {
-      html += `<div class="stat-row">
-        <span class="stat-label" style="display:flex;align-items:center;gap:4px">
-          <span style="width:6px;height:6px;border-radius:50%;background:${categoryColors[cat]};display:inline-block"></span>
-          ${cat}
-        </span>
-        <span class="stat-value">${c}</span>
-      </div>`;
-    }
+    const c = vis.filter(n => n.category === cat).length;
+    if (c > 0) h += `<div class="stat-row"><span class="stat-label"><span style="width:6px;height:6px;border-radius:50%;background:${categoryColors[cat]};display:inline-block"></span> ${cat}</span><span class="stat-value">${c}</span></div>`;
   });
-
-  document.getElementById('statsContent').innerHTML = html;
+  document.getElementById('statsContent').innerHTML = h;
 }
 
-/* ================================================================
-   LEGEND
-   ================================================================ */
-function buildLegend() {
-  const panel = document.getElementById('legendPanel');
-  let html = '<h4>Categories</h4>';
-  categories.forEach(cat => {
-    html += `<div class="legend-item"><span class="legend-dot" style="background:${categoryColors[cat]}"></span>${cat}</div>`;
-  });
-  html += '<hr class="legend-divider"><h4>Postsynaptic Effect</h4>';
-  Object.keys(effectColors).forEach(eff => {
-    html += `<div class="legend-item"><span class="legend-dot" style="background:${effectColors[eff]}"></span>Postsynaptic Effect: ${eff}</div>`;
-  });
-  panel.innerHTML = html;
-  panel.style.display = 'block';
-
-  // Position legend relative to main content, lower-left of wheel area
-  const mc = document.querySelector('.main-content');
-  const sidebar = document.getElementById('leftSidebar');
-  if (mc && sidebar) {
-    const sRect = sidebar.getBoundingClientRect();
-    panel.style.left = (sRect.right + 8) + 'px';
-    panel.style.bottom = '12px';
-  }
-}
-
-/* ================================================================
-   DETAIL PANEL
-   ================================================================ */
-function showDetailPanel(nt) {
+/* DETAIL PANEL */
+function showDetail(nt) {
   selectedNT = nt;
-  const panel = document.getElementById('detailPanel');
   document.getElementById('detailTitle').textContent = nt.name;
   document.getElementById('detailAbbr').textContent = nt.abbreviation;
+  const cc = categoryColors[nt.category] || '#555';
+  const ec = effectColors[nt.postsynaptic_effect] || '#888';
 
-  const catColor = categoryColors[nt.category] || '#555';
-  const effColor = effectBadgeColor(nt.postsynaptic_effect);
+  let h = '<div class="detail-badges">';
+  h += `<span class="detail-badge" style="background:${cc}22;color:${cc};border:1px solid ${cc}44"><span class="badge-dot" style="background:${cc}"></span>${nt.category}</span>`;
+  h += `<span class="detail-badge" style="background:${ec}22;color:${ec};border:1px solid ${ec}44"><span class="badge-dot" style="background:${ec}"></span>Postsynaptic Effect: ${nt.postsynaptic_effect}</span>`;
+  h += '</div>';
 
-  let html = '<div class="detail-badges">';
-  html += `<span class="detail-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}44">
-    <span class="badge-dot" style="background:${catColor}"></span>${nt.category}</span>`;
-  html += `<span class="detail-badge" style="background:${effColor}22;color:${effColor};border:1px solid ${effColor}44">
-    <span class="badge-dot" style="background:${effColor}"></span>Postsynaptic Effect: ${nt.postsynaptic_effect}</span>`;
-  html += '</div>';
-
-  const sections = [
-    ['Postsynaptic Detail', nt.postsynaptic_detail],
-    ['Precursor / Biosynthetic Pathway', nt.precursor],
-    ['Synthesis Enzyme', nt.synthesis_enzyme],
-    ['Receptor Types', nt.receptor_types],
-    ['Primary Brain Regions', nt.primary_location],
-    ['Behavioral / Functional Roles', nt.behavioral_role],
-    ['Associated Disorders', nt.disorders],
-    ['Key Pharmacological Targets', nt.drugs]
-  ];
-
-  sections.forEach(([label, value]) => {
-    if (value) {
-      html += `<div class="detail-section">
-        <div class="detail-section-label">${label}</div>
-        <div class="detail-section-value">${value}</div>
-      </div>`;
-    }
+  [['Postsynaptic Detail', nt.postsynaptic_detail],
+   ['Precursor / Biosynthetic Pathway', nt.precursor],
+   ['Synthesis Enzyme', nt.synthesis_enzyme],
+   ['Receptor Types', nt.receptor_types],
+   ['Primary Brain Regions', nt.primary_location],
+   ['Behavioral / Functional Roles', nt.behavioral_role],
+   ['Associated Disorders', nt.disorders],
+   ['Key Pharmacological Targets', nt.drugs]
+  ].forEach(([l, v]) => {
+    if (v) h += `<div class="detail-section"><div class="detail-section-label">${l}</div><div class="detail-section-value">${v}</div></div>`;
   });
 
-  document.getElementById('detailBody').innerHTML = html;
-  panel.classList.add('open');
+  document.getElementById('detailBody').innerHTML = h;
+  document.getElementById('detailPanel').classList.add('open');
 }
 
-function hideDetailPanel() {
+function hideDetail() {
   selectedNT = null;
   document.getElementById('detailPanel').classList.remove('open');
-  // Redraw to remove selection highlight
-  drawWheel(true);
+  clearHL();
 }
 
-document.getElementById('detailClose').addEventListener('click', hideDetailPanel);
+document.getElementById('detailClose').onclick = hideDetail;
 
-/* ================================================================
-   TOOLTIP
-   ================================================================ */
-const tooltipEl = document.getElementById('tooltip');
+/* TOOLTIP */
+const ttEl = document.getElementById('tooltip');
 
-function showTooltip(nt, event) {
-  const effColor = effectBadgeColor(nt.postsynaptic_effect);
-  tooltipEl.innerHTML = `
-    <div class="tooltip-name">${nt.name}</div>
-    <div class="tooltip-abbr">${nt.abbreviation}</div>
-    <div class="tooltip-row"><strong>Category:</strong> ${nt.category}</div>
-    <div class="tooltip-row">
-      <strong>Postsynaptic Effect:</strong>
-      <span class="tooltip-badge" style="background:${effColor}">${nt.postsynaptic_effect}</span>
-    </div>`;
-  tooltipEl.classList.add('visible');
-  positionTooltip(event);
+function showTT(nt, ev) {
+  const ec = effectColors[nt.postsynaptic_effect] || '#888';
+  let h = `<div class="tooltip-name">${nt.name}</div>`;
+  h += `<div class="tooltip-abbr">${nt.abbreviation}</div>`;
+  h += `<div class="tooltip-row"><strong>Category:</strong> ${nt.category}</div>`;
+  h += `<div class="tooltip-row"><strong>Postsynaptic Effect:</strong> <span class="tooltip-badge" style="background:${ec}">${nt.postsynaptic_effect}</span></div>`;
+  h += `<div class="tooltip-row"><strong>Precursor:</strong> ${nt.precursor}</div>`;
+  h += `<div class="tooltip-row"><strong>Location:</strong> ${nt.primary_location}</div>`;
+  h += `<div class="tooltip-row"><strong>Function:</strong> ${trunc(nt.behavioral_role, 80)}</div>`;
+  ttEl.innerHTML = h;
+  ttEl.classList.add('visible');
+  posTT(ev);
 }
 
-function positionTooltip(event) {
-  const tt = tooltipEl;
-  const pad = 14;
-  let x = event.clientX + pad;
-  let y = event.clientY + pad;
-  // Prevent overflow
-  const rect = tt.getBoundingClientRect();
-  if (x + rect.width > window.innerWidth - 10) x = event.clientX - rect.width - pad;
-  if (y + rect.height > window.innerHeight - 10) y = event.clientY - rect.height - pad;
-  tt.style.left = x + 'px';
-  tt.style.top = y + 'px';
+function posTT(ev) {
+  let x = ev.clientX + 14, y = ev.clientY + 14;
+  const r = ttEl.getBoundingClientRect();
+  if (x + r.width > window.innerWidth - 10) x = ev.clientX - r.width - 14;
+  if (y + r.height > window.innerHeight - 10) y = ev.clientY - r.height - 14;
+  ttEl.style.left = x + 'px';
+  ttEl.style.top = y + 'px';
 }
 
-function hideTooltip() {
-  tooltipEl.classList.remove('visible');
-}
+function hideTT() { ttEl.classList.remove('visible'); }
 
-/* ================================================================
-   THEME TOGGLE
-   ================================================================ */
-document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+/* ZOOM */
+let zoomBehavior;
+let zoomG;
 
-function toggleTheme() {
-  isDark = !isDark;
-  document.body.classList.toggle('light-theme', !isDark);
-  document.getElementById('themeIcon').innerHTML = isDark ? '&#9790;' : '&#9728;';
-  document.getElementById('themeLabel').textContent = isDark ? 'Dark' : 'Light';
-  drawWheel(true);
-}
+document.getElementById('zoomIn').onclick = () => {
+  d3.select('#wheelSvg').transition().duration(300).call(zoomBehavior.scaleBy, 1.4);
+};
+document.getElementById('zoomOut').onclick = () => {
+  d3.select('#wheelSvg').transition().duration(300).call(zoomBehavior.scaleBy, 0.7);
+};
+document.getElementById('zoomReset').onclick = () => {
+  d3.select('#wheelSvg').transition().duration(300).call(zoomBehavior.transform, d3.zoomIdentity);
+};
 
-/* ================================================================
-   DRAW WHEEL (D3.js)
-   ================================================================ */
-let svgInitialized = false;
-let introPlayed = false;
-
-function drawWheel(skipAnimation) {
-  const visible = getVisibleNTs();
-  const layout = computeLayout(visible);
-  const { segments, catSegments } = layout;
+/* DRAW WHEEL */
+function drawWheel() {
+  const visible = getVisible();
+  const { segs, cats } = computeLayout(visible);
 
   const svg = d3.select('#wheelSvg');
   svg.selectAll('*').remove();
 
-  // Responsive sizing
-  const container = document.getElementById('wheelContainer');
-  const cw = container.clientWidth;
-  const ch = container.clientHeight;
-  const size = Math.min(cw, ch, 950);
+  const area = document.getElementById('wheelArea');
+  const size = Math.min(area.clientWidth, area.clientHeight);
+  svg.attr('width', size).attr('height', size)
+     .attr('viewBox', `${-VIEW/2} ${-VIEW/2} ${VIEW} ${VIEW}`);
 
-  svg
-    .attr('width', size)
-    .attr('height', size)
-    .attr('viewBox', `${-VIEW_SIZE/2} ${-VIEW_SIZE/2} ${VIEW_SIZE} ${VIEW_SIZE}`);
+  // Zoom
+  zoomBehavior = d3.zoom()
+    .scaleExtent([0.5, 8])
+    .on('zoom', (e) => { zoomG.attr('transform', e.transform); });
+  svg.call(zoomBehavior);
 
-  // Defs: glow filter
-  const defs = svg.append('defs');
-  const glowFilter = defs.append('filter').attr('id', 'glow');
-  glowFilter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'blur');
-  const merge = glowFilter.append('feMerge');
-  merge.append('feMergeNode').attr('in', 'blur');
-  merge.append('feMergeNode').attr('in', 'SourceGraphic');
+  zoomG = svg.append('g').attr('class', 'zoomable');
 
-  const glowStrong = defs.append('filter').attr('id', 'glowStrong');
-  glowStrong.append('feGaussianBlur').attr('stdDeviation', '4').attr('result', 'blur');
-  const merge2 = glowStrong.append('feMerge');
-  merge2.append('feMergeNode').attr('in', 'blur');
-  merge2.append('feMergeNode').attr('in', 'SourceGraphic');
-
-  const masterG = svg.append('g').attr('class', 'wheel-master');
-
-  if (segments.length === 0) {
-    masterG.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('dy', '0.35em')
-      .attr('fill', isDark ? '#64748b' : '#94a3b8')
-      .attr('font-size', 16)
-      .attr('font-family', 'Inter, sans-serif')
-      .text('No neurotransmitters match filters');
+  if (segs.length === 0) {
+    zoomG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em')
+      .attr('fill', '#888').attr('font-size', 14).attr('font-family', 'Inter, sans-serif')
+      .text('No results');
     return;
   }
 
-  // ---- Ring guide circles ----
-  const guideGroup = masterG.append('g').attr('class', 'guides');
-  [R0_OUTER, R1_OUTER, R2_OUTER, R3_OUTER, R4_OUTER].forEach(r => {
-    guideGroup.append('circle')
-      .attr('r', r)
-      .attr('fill', 'none')
-      .attr('stroke', isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)')
-      .attr('stroke-width', 0.5);
+  // Guide circles
+  [R0_OUT, R1_OUT, R2_OUT, R3_OUT, R4_OUT].forEach(r => {
+    zoomG.append('circle').attr('r', r).attr('fill', 'none')
+      .attr('stroke', '#bbb').attr('stroke-width', 0.5);
   });
 
-  // Ring label annotations
-  const ringLabels = [
-    { r: (R0_INNER + R0_OUTER) / 2, label: '' },
-    { r: R1_OUTER + 2, label: '' },
-    { r: R2_INNER - 2, label: '' },
-    { r: R3_OUTER + 2, label: '' },
-    { r: R4_OUTER + 2, label: '' }
-  ];
+  // RING 0: Categories
+  const catArc = d3.arc().innerRadius(R0_IN).outerRadius(R0_OUT);
+  const catG = zoomG.append('g').attr('data-ring', 'cat');
 
-  // ---- RING 0: Categories ----
-  const catArc = d3.arc().innerRadius(R0_INNER).outerRadius(R0_OUTER);
-  const catGroup = masterG.append('g').attr('class', 'ring-categories');
+  // Pass 1: compute a UNIFORM font size that fits ALL visible category labels
+  const catTextR = (R0_IN + R0_OUT) / 2;
+  const catAvailLen = R0_OUT * 1.6;
+  let uniformCatFont = 13; // start at max
+  cats.forEach(cs => {
+    const arcW = (cs.e - cs.s) * catTextR;
+    const fontByArc = Math.min(13, arcW * 0.5);
+    const fontByLen = catAvailLen / (cs.cat.length * 0.6);
+    uniformCatFont = Math.min(uniformCatFont, fontByArc, fontByLen);
+  });
+  uniformCatFont = Math.max(4, uniformCatFont); // floor
 
-  catSegments.forEach(cs => {
-    const g = catGroup.append('g').attr('class', 'cat-segment');
-
+  // Pass 2: render all category segments and labels at uniform size
+  cats.forEach(cs => {
+    const g = catG.append('g');
     g.append('path')
-      .attr('d', catArc({ startAngle: cs.startAngle, endAngle: cs.endAngle }))
-      .attr('fill', cs.color)
-      .attr('fill-opacity', 0.7)
-      .attr('stroke', isDark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)')
-      .attr('stroke-width', 0.5)
+      .attr('d', catArc({ startAngle: cs.s, endAngle: cs.e }))
+      .attr('fill', darken(cs.color, 0.05)).attr('fill-opacity', catOpacity())
+      .attr('stroke', segStroke()).attr('stroke-width', 0.5)
       .style('cursor', 'pointer')
-      .style('transition', 'fill-opacity 0.3s ease')
-      .on('click', function(event) {
-        event.stopPropagation();
-        // Toggle to show only this category
-        const wasOnlyActive = activeCategories.size === 1 && activeCategories.has(cs.category);
-        if (wasOnlyActive) {
-          activeCategories = new Set(categories);
-        } else {
-          activeCategories = new Set([cs.category]);
-        }
-        // Update filter buttons
+      .on('click', (ev) => {
+        ev.stopPropagation();
+        const only = activeCategories.size === 1 && activeCategories.has(cs.cat);
+        activeCategories = only ? new Set(categories) : new Set([cs.cat]);
         document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
-          const cat = btn.dataset.category;
-          if (activeCategories.has(cat)) {
-            btn.classList.add('active');
-            btn.classList.remove('inactive');
-          } else {
-            btn.classList.remove('active');
-            btn.classList.add('inactive');
-          }
+          activeCategories.has(btn.dataset.category) ? btn.classList.remove('inactive') : btn.classList.add('inactive');
         });
-        drawWheel();
-        updateStats();
+        redraw();
       });
 
-    // Category text
-    const span = cs.endAngle - cs.startAngle;
-    if (span > degToRad(12)) {
-      const mid = cs.midAngle;
-      const textR = (R0_INNER + R0_OUTER) / 2;
-      const angle = textAngleDeg(mid);
-      const x = textR * Math.cos(mid - Math.PI / 2);
-      const y = textR * Math.sin(mid - Math.PI / 2);
-      g.append('text')
-        .attr('x', x)
-        .attr('y', y)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central')
-        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
-        .attr('fill', '#fff')
-        .attr('font-size', span > degToRad(30) ? 8 : 6.5)
-        .attr('font-weight', 700)
-        .attr('font-family', 'Inter, sans-serif')
-        .attr('letter-spacing', '0.5px')
-        .text(truncateText(cs.category, span > degToRad(25) ? 20 : 10))
+    // Label — uniform font size, text radiates from center, never upside down
+    const arcW = (cs.e - cs.s) * catTextR;
+    if (arcW >= uniformCatFont * 0.8) {
+      const rot = textRot(cs.m);
+      const x = catTextR * Math.cos(cs.m - Math.PI / 2);
+      const y = catTextR * Math.sin(cs.m - Math.PI / 2);
+      g.append('text').attr('x', x).attr('y', y)
+        .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+        .attr('transform', `rotate(${rot},${x},${y})`)
+        .attr('fill', '#fff').attr('font-size', uniformCatFont)
+        .attr('font-weight', 700).attr('font-family', 'Inter, sans-serif')
+        .text(cs.cat)
         .style('pointer-events', 'none');
     }
   });
 
-  // ---- RING 1: NT Names ----
-  const ntArc = d3.arc().innerRadius(R1_INNER).outerRadius(R1_OUTER);
-  const ntGroup = masterG.append('g').attr('class', 'ring-nt-names');
+  // RING 1: NT Names
+  const ntArc = d3.arc().innerRadius(R1_IN).outerRadius(R1_OUT);
+  const ntG = zoomG.append('g').attr('data-ring', 'nt');
 
-  segments.forEach(seg => {
-    const catColor = categoryColors[seg.nt.category] || '#555';
-    const g = ntGroup.append('g')
-      .attr('class', 'nt-segment')
-      .attr('data-nt-id', seg.nt.id);
+  segs.forEach(seg => {
+    const cc = categoryColors[seg.nt.category] || '#555';
+    const g = ntG.append('g').attr('data-id', seg.nt.id);
 
     g.append('path')
-      .attr('d', ntArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
-      .attr('fill', catColor)
-      .attr('fill-opacity', 0.55)
-      .attr('stroke', isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)')
-      .attr('stroke-width', 0.4)
-      .style('cursor', 'pointer')
-      .style('transition', 'fill-opacity 0.2s ease');
+      .attr('d', ntArc({ startAngle: seg.s, endAngle: seg.e }))
+      .attr('fill', ringColor(cc, 1)).attr('fill-opacity', ntOpacity())
+      .attr('stroke', segStroke()).attr('stroke-width', 0.3)
+      .style('cursor', 'pointer');
 
-    const span = arcWidth(seg.startAngle, seg.endAngle);
-    if (span > 4) {
-      const mid = seg.midAngle;
-      const textR = (R1_INNER + R1_OUTER) / 2;
-      const angle = textAngleDeg(mid);
-      const x = textR * Math.cos(mid - Math.PI / 2);
-      const y = textR * Math.sin(mid - Math.PI / 2);
-      g.append('text')
-        .attr('x', x)
-        .attr('y', y)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central')
-        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
-        .attr('fill', '#fff')
-        .attr('font-size', span > 8 ? 7.5 : 6)
-        .attr('font-weight', 600)
-        .attr('font-family', 'Inter, sans-serif')
-        .text(truncateText(seg.nt.abbreviation, span > 10 ? 12 : 6))
-        .style('pointer-events', 'none');
-    }
-  });
-
-  // ---- RING 2: Postsynaptic Effect (color band, no text) ----
-  const effArc = d3.arc().innerRadius(R2_INNER).outerRadius(R2_OUTER);
-  const effGroup = masterG.append('g').attr('class', 'ring-effect');
-
-  segments.forEach(seg => {
-    const effColor = effectBadgeColor(seg.nt.postsynaptic_effect);
-    effGroup.append('path')
-      .attr('d', effArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
-      .attr('fill', effColor)
-      .attr('fill-opacity', 0.7)
-      .attr('stroke', isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.35)')
-      .attr('stroke-width', 0.3)
-      .attr('data-nt-id', seg.nt.id)
-      .style('cursor', 'pointer')
-      .style('transition', 'fill-opacity 0.2s ease');
-  });
-
-  // ---- RING 3: Precursor ----
-  const precArc = d3.arc().innerRadius(R3_INNER).outerRadius(R3_OUTER);
-  const precGroup = masterG.append('g').attr('class', 'ring-precursor');
-
-  segments.forEach(seg => {
-    const catColor = categoryColors[seg.nt.category] || '#555';
-    const fillColor = lightenColor(catColor, 0.15);
-
-    precGroup.append('path')
-      .attr('d', precArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
-      .attr('fill', fillColor)
-      .attr('fill-opacity', 0.35)
-      .attr('stroke', isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)')
-      .attr('stroke-width', 0.3)
-      .attr('data-nt-id', seg.nt.id)
-      .style('cursor', 'pointer')
-      .style('transition', 'fill-opacity 0.2s ease');
-
-    const span = arcWidth(seg.startAngle, seg.endAngle);
-    if (span > 5 && seg.nt.precursor) {
-      const mid = seg.midAngle;
-      const textR = (R3_INNER + R3_OUTER) / 2;
-      const angle = textAngleDeg(mid);
-      const x = textR * Math.cos(mid - Math.PI / 2);
-      const y = textR * Math.sin(mid - Math.PI / 2);
-      precGroup.append('text')
-        .attr('x', x)
-        .attr('y', y)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central')
-        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
-        .attr('fill', isDark ? '#cbd5e1' : '#475569')
-        .attr('font-size', span > 10 ? 6.5 : 5)
-        .attr('font-weight', 400)
-        .attr('font-family', 'Inter, sans-serif')
-        .text(truncateText(seg.nt.precursor, span > 15 ? 28 : 14))
-        .style('pointer-events', 'none');
-    }
-  });
-
-  // ---- RING 4: Primary Brain Region ----
-  const locArc = d3.arc().innerRadius(R4_INNER).outerRadius(R4_OUTER);
-  const locGroup = masterG.append('g').attr('class', 'ring-location');
-
-  segments.forEach(seg => {
-    const catColor = categoryColors[seg.nt.category] || '#555';
-    const fillColor = lightenColor(catColor, 0.3);
-
-    locGroup.append('path')
-      .attr('d', locArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
-      .attr('fill', fillColor)
-      .attr('fill-opacity', 0.25)
-      .attr('stroke', isDark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.25)')
-      .attr('stroke-width', 0.3)
-      .attr('data-nt-id', seg.nt.id)
-      .style('cursor', 'pointer')
-      .style('transition', 'fill-opacity 0.2s ease');
-
-    const span = arcWidth(seg.startAngle, seg.endAngle);
-    if (span > 5 && seg.nt.primary_location) {
-      const mid = seg.midAngle;
-      const textR = (R4_INNER + R4_OUTER) / 2;
-      const angle = textAngleDeg(mid);
-      const x = textR * Math.cos(mid - Math.PI / 2);
-      const y = textR * Math.sin(mid - Math.PI / 2);
-      locGroup.append('text')
-        .attr('x', x)
-        .attr('y', y)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central')
-        .attr('transform', `rotate(${angle}, ${x}, ${y})`)
-        .attr('fill', isDark ? '#94a3b8' : '#64748b')
-        .attr('font-size', span > 10 ? 6 : 4.5)
-        .attr('font-weight', 400)
-        .attr('font-family', 'Inter, sans-serif')
-        .text(truncateText(seg.nt.primary_location, span > 15 ? 26 : 12))
-        .style('pointer-events', 'none');
-    }
-  });
-
-  // ---- OUTER LABELS: Behavioral Role ----
-  const labelGroup = masterG.append('g').attr('class', 'outer-labels');
-
-  segments.forEach(seg => {
-    const span = arcWidth(seg.startAngle, seg.endAngle);
-    if (span > 5 && seg.nt.behavioral_role) {
-      const mid = seg.midAngle;
-      const textR = LABEL_RADIUS;
-      // For outer labels, rotate to point outward
-      let angleDeg = (mid * 180 / Math.PI) - 90;
-      let anchor = 'start';
-      if (mid > Math.PI / 2 && mid < 3 * Math.PI / 2) {
-        angleDeg += 180;
-        anchor = 'end';
+    // NT abbreviation — font scaled to arc width; full abbreviation shown if readable
+    const ntTextR = (R1_IN + R1_OUT) / 2;
+    const ntArcW = (seg.e - seg.s) * ntTextR;
+    if (ntArcW > 5) {
+      const rot = textRot(seg.m);
+      const x = ntTextR * Math.cos(seg.m - Math.PI / 2);
+      const y = ntTextR * Math.sin(seg.m - Math.PI / 2);
+      const abbr = seg.nt.abbreviation;
+      const fontByArc = Math.min(12, Math.max(4, ntArcW * 0.55));
+      const availLength = (R1_OUT - R1_IN) * 1.3;
+      const fontByLength = availLength / (abbr.length * 0.6);
+      const fontSize = Math.min(fontByArc, fontByLength, 12);
+      if (fontSize >= 4) {
+        g.append('text').attr('x', x).attr('y', y)
+          .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+          .attr('transform', `rotate(${rot},${x},${y})`)
+          .attr('fill', '#fff').attr('font-size', fontSize)
+          .attr('font-weight', 600).attr('font-family', 'Inter, sans-serif')
+          .text(abbr)
+          .style('pointer-events', 'none');
       }
-      const x = textR * Math.cos(mid - Math.PI / 2);
-      const y = textR * Math.sin(mid - Math.PI / 2);
-      labelGroup.append('text')
-        .attr('x', x)
-        .attr('y', y)
-        .attr('text-anchor', anchor)
-        .attr('dominant-baseline', 'central')
-        .attr('transform', `rotate(${angleDeg}, ${x}, ${y})`)
-        .attr('fill', isDark ? '#64748b' : '#94a3b8')
-        .attr('font-size', span > 12 ? 5.5 : 4)
-        .attr('font-weight', 400)
-        .attr('font-family', 'Inter, sans-serif')
-        .text(truncateText(seg.nt.behavioral_role, span > 15 ? 40 : 20))
-        .style('pointer-events', 'none')
-        .attr('data-nt-id', seg.nt.id);
     }
   });
 
-  // ---- CENTER DECORATION ----
-  const centerGroup = masterG.append('g').attr('class', 'center-deco');
-
-  // Circular text: "NEURO" on top, "TRANSMITTERS" on bottom
-  const centerR = 52;
-  // Top arc
-  const topArcPath = defs.append('path')
-    .attr('id', 'centerTopArc')
-    .attr('d', `M ${-centerR},0 A ${centerR},${centerR} 0 0,1 ${centerR},0`)
-    .attr('fill', 'none');
-
-  centerGroup.append('text')
-    .append('textPath')
-    .attr('href', '#centerTopArc')
-    .attr('startOffset', '50%')
-    .attr('text-anchor', 'middle')
-    .attr('fill', isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)')
-    .attr('font-size', 8)
-    .attr('font-weight', 800)
-    .attr('font-family', 'Inter, sans-serif')
-    .attr('letter-spacing', '3px')
-    .text('NEURO');
-
-  // Bottom arc
-  const botArcPath = defs.append('path')
-    .attr('id', 'centerBotArc')
-    .attr('d', `M ${centerR},0 A ${centerR},${centerR} 0 0,1 ${-centerR},0`)
-    .attr('fill', 'none');
-
-  centerGroup.append('text')
-    .append('textPath')
-    .attr('href', '#centerBotArc')
-    .attr('startOffset', '50%')
-    .attr('text-anchor', 'middle')
-    .attr('fill', isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)')
-    .attr('font-size', 6.5)
-    .attr('font-weight', 800)
-    .attr('font-family', 'Inter, sans-serif')
-    .attr('letter-spacing', '2px')
-    .text('TRANSMITTERS');
-
-  // Small neuron-like decoration at center
-  centerGroup.append('circle')
-    .attr('cx', 0).attr('cy', 0).attr('r', 18)
-    .attr('fill', 'none')
-    .attr('stroke', isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
-    .attr('stroke-width', 1);
-  centerGroup.append('circle')
-    .attr('cx', 0).attr('cy', 0).attr('r', 6)
-    .attr('fill', isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)')
-    .attr('stroke', isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')
-    .attr('stroke-width', 0.5);
-  // Dendrite-like lines from center
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2;
-    centerGroup.append('line')
-      .attr('x1', 6 * Math.cos(a)).attr('y1', 6 * Math.sin(a))
-      .attr('x2', 16 * Math.cos(a)).attr('y2', 16 * Math.sin(a))
-      .attr('stroke', isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)')
-      .attr('stroke-width', 0.8);
-  }
-
-  // ---- Ring label annotations (between rings) ----
-  const ringLabelData = [
-    { r: R1_INNER - 4, label: 'NT NAME' },
-    { r: R2_INNER - 4, label: 'POSTSYNAPTIC EFFECT' },
-    { r: R3_INNER - 4, label: 'PRECURSOR' },
-    { r: R4_INNER - 4, label: 'BRAIN REGION' }
-  ];
-
-  ringLabelData.forEach(rl => {
-    const labelArc = defs.append('path')
-      .attr('id', 'ringLabel_' + rl.r)
-      .attr('d', `M ${-rl.r},0 A ${rl.r},${rl.r} 0 0,1 ${rl.r},0`)
-      .attr('fill', 'none');
-
-    masterG.append('text')
-      .attr('class', 'ring-label-text')
-      .append('textPath')
-      .attr('href', '#ringLabel_' + rl.r)
-      .attr('startOffset', '50%')
-      .attr('text-anchor', 'middle')
-      .attr('fill', isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)')
-      .attr('font-size', 5)
-      .attr('font-weight', 700)
-      .attr('font-family', 'Inter, sans-serif')
-      .attr('letter-spacing', '1.5px')
-      .text(rl.label);
+  // RING 2: Postsynaptic Effect band (color only)
+  const effArc = d3.arc().innerRadius(R2_IN).outerRadius(R2_OUT);
+  const effG = zoomG.append('g').attr('data-ring', 'eff');
+  segs.forEach(seg => {
+    effG.append('path')
+      .attr('d', effArc({ startAngle: seg.s, endAngle: seg.e }))
+      .attr('fill', effectColors[seg.nt.postsynaptic_effect] || '#888')
+      .attr('fill-opacity', effOpacity())
+      .attr('stroke', segStroke()).attr('stroke-width', 0.2)
+      .attr('data-id', seg.nt.id).style('cursor', 'pointer');
   });
 
-  // ---- INTERACTION OVERLAY (transparent arcs for hover/click) ----
-  const interGroup = masterG.append('g').attr('class', 'interaction-layer');
-  const fullArc = d3.arc().innerRadius(R0_INNER).outerRadius(R4_OUTER + 20);
+  // RING 3: Precursor (color only — no text, info on hover)
+  const precArc = d3.arc().innerRadius(R3_IN).outerRadius(R3_OUT);
+  const precG = zoomG.append('g').attr('data-ring', 'prec');
+  segs.forEach(seg => {
+    const cc = ringColor(categoryColors[seg.nt.category] || '#555', 3);
+    precG.append('path')
+      .attr('d', precArc({ startAngle: seg.s, endAngle: seg.e }))
+      .attr('fill', cc).attr('fill-opacity', precOpacity())
+      .attr('stroke', segStroke()).attr('stroke-width', 0.2)
+      .attr('data-id', seg.nt.id).style('cursor', 'pointer');
+  });
 
-  segments.forEach(seg => {
-    interGroup.append('path')
-      .attr('d', fullArc({ startAngle: seg.startAngle, endAngle: seg.endAngle }))
-      .attr('fill', 'transparent')
-      .attr('stroke', 'none')
+  // RING 4: Location (color only — no text, info on hover)
+  const locArc = d3.arc().innerRadius(R4_IN).outerRadius(R4_OUT);
+  const locG = zoomG.append('g').attr('data-ring', 'loc');
+  segs.forEach(seg => {
+    const cc = ringColor(categoryColors[seg.nt.category] || '#555', 4);
+    locG.append('path')
+      .attr('d', locArc({ startAngle: seg.s, endAngle: seg.e }))
+      .attr('fill', cc).attr('fill-opacity', locOpacity())
+      .attr('stroke', segStroke()).attr('stroke-width', 0.2)
+      .attr('data-id', seg.nt.id).style('cursor', 'pointer');
+  });
+
+  // Center: empty — clean look
+
+  // INTERACTION OVERLAY — no gaps so mouse transitions are seamless
+  const hitArc = d3.arc().innerRadius(R0_IN).outerRadius(R4_OUT).padAngle(0);
+  const hitG = zoomG.append('g');
+
+  segs.forEach(seg => {
+    hitG.append('path')
+      .attr('d', hitArc({ startAngle: seg.s - PAD / 2, endAngle: seg.e + PAD / 2 }))
+      .attr('fill', 'transparent').attr('stroke', 'none')
       .style('cursor', 'pointer')
-      .attr('data-nt-id', seg.nt.id)
-      .on('mouseenter', function(event) {
-        hoveredNT = seg.nt;
+      .on('mouseenter', (ev) => {
+        clearTimeout(hoverOutTimer);
         highlightNT(seg.nt.id);
-        showTooltip(seg.nt, event);
+        showTT(seg.nt, ev);
       })
-      .on('mousemove', function(event) {
-        positionTooltip(event);
+      .on('mousemove', (ev) => { posTT(ev); })
+      .on('mouseleave', () => {
+        hoverOutTimer = setTimeout(() => { if (!selectedNT) clearHL(); hideTT(); }, 30);
       })
-      .on('mouseleave', function() {
-        hoveredNT = null;
-        clearHighlight();
-        hideTooltip();
-      })
-      .on('click', function(event) {
-        event.stopPropagation();
-        showDetailPanel(seg.nt);
-        highlightNT(seg.nt.id, true);
-      });
+      .on('click', (ev) => { ev.stopPropagation(); showDetail(seg.nt); highlightNT(seg.nt.id); });
   });
 
-  // ---- Highlight for selected NT ----
-  if (selectedNT && !skipAnimation) {
-    const selSeg = segments.find(s => s.nt.id === selectedNT.id);
-    if (selSeg) {
-      highlightNT(selectedNT.id, true);
-    }
-  }
-
-  // ---- Animated intro ----
-  if (!introPlayed && !skipAnimation) {
-    introPlayed = true;
-    animateIntro(masterG);
+  if (selectedNT) {
+    const still = segs.find(s => s.nt.id === selectedNT.id);
+    if (still) highlightNT(selectedNT.id);
   }
 }
 
-/* ================================================================
-   HIGHLIGHT / DIM
-   ================================================================ */
-function highlightNT(ntId, locked) {
+/* HIGHLIGHT */
+function highlightNT(id) {
   const svg = d3.select('#wheelSvg');
-
-  // Dim all segments
-  svg.selectAll('.ring-nt-names path, .ring-effect path, .ring-precursor path, .ring-location path')
-    .transition().duration(150)
-    .attr('fill-opacity', function() {
-      return +this.getAttribute('data-nt-id') === ntId ||
-             this.closest('.nt-segment')?.getAttribute('data-nt-id') == ntId
-        ? null : 0.12;
-    });
-
-  // Handle NT name segments specifically
-  svg.selectAll('.nt-segment').each(function() {
+  // Dim/highlight per-NT paths (rings 2,3,4)
+  svg.selectAll('path[data-id]').each(function() {
+    const el = d3.select(this);
+    el.attr('fill-opacity', +el.attr('data-id') === id ? 0.95 : 0.06);
+  });
+  // Dim/highlight NT name ring groups
+  svg.selectAll('g[data-id]').each(function() {
     const g = d3.select(this);
-    const id = +g.attr('data-nt-id');
-    const path = g.select('path');
-    if (id === ntId) {
-      path.transition().duration(150).attr('fill-opacity', 0.9);
-      path.attr('filter', 'url(#glow)');
-    } else {
-      path.transition().duration(150).attr('fill-opacity', 0.12);
-      path.attr('filter', null);
-    }
+    const match = +g.attr('data-id') === id;
+    g.select('path').attr('fill-opacity', match ? 0.9 : 0.08);
+    g.select('text').attr('fill-opacity', match ? 1 : 0.1);
   });
-
-  // Ring 2, 3, 4 segments with data-nt-id
-  svg.selectAll('.ring-effect path, .ring-precursor path, .ring-location path').each(function() {
-    const el = d3.select(this);
-    const id = +el.attr('data-nt-id');
-    if (id === ntId) {
-      el.transition().duration(150).attr('fill-opacity', 0.85);
-      el.attr('filter', 'url(#glow)');
-    } else {
-      el.transition().duration(150).attr('fill-opacity', 0.1);
-      el.attr('filter', null);
-    }
-  });
-
-  // Outer labels
-  svg.selectAll('.outer-labels text').each(function() {
-    const el = d3.select(this);
-    const id = +el.attr('data-nt-id');
-    el.transition().duration(150).attr('fill-opacity', id === ntId ? 1 : 0.15);
-  });
-
-  // Category ring: dim categories not matching
-  const matchNT = ntData.find(n => n.id === ntId);
-  if (matchNT) {
-    svg.selectAll('.cat-segment path').each(function(d, i) {
-      // We can't easily get category from the path, so dim all to lighter
-      d3.select(this).transition().duration(150).attr('fill-opacity', 0.3);
-    });
-  }
+  // Dim category ring
+  svg.selectAll('[data-ring="cat"] path').attr('fill-opacity', 0.2);
 }
 
-function clearHighlight() {
-  if (selectedNT) return; // Don't clear if something is locked
-
+function clearHL() {
+  // Tag each ring group in drawWheel so we can reset properly
   const svg = d3.select('#wheelSvg');
-
-  svg.selectAll('.nt-segment path')
-    .transition().duration(200)
-    .attr('fill-opacity', 0.55)
-    .attr('filter', null);
-
-  svg.selectAll('.ring-effect path')
-    .transition().duration(200)
-    .attr('fill-opacity', 0.7)
-    .attr('filter', null);
-
-  svg.selectAll('.ring-precursor path')
-    .transition().duration(200)
-    .attr('fill-opacity', 0.35)
-    .attr('filter', null);
-
-  svg.selectAll('.ring-location path')
-    .transition().duration(200)
-    .attr('fill-opacity', 0.25)
-    .attr('filter', null);
-
-  svg.selectAll('.outer-labels text')
-    .transition().duration(200)
-    .attr('fill-opacity', 1);
-
-  svg.selectAll('.cat-segment path')
-    .transition().duration(200)
-    .attr('fill-opacity', 0.7);
+  svg.selectAll('[data-ring="cat"] path').attr('fill-opacity', catOpacity());
+  svg.selectAll('[data-ring="nt"] path').attr('fill-opacity', ntOpacity());
+  svg.selectAll('[data-ring="nt"] text').attr('fill-opacity', 1);
+  svg.selectAll('[data-ring="eff"] path').attr('fill-opacity', effOpacity());
+  svg.selectAll('[data-ring="prec"] path').attr('fill-opacity', precOpacity());
+  svg.selectAll('[data-ring="loc"] path').attr('fill-opacity', locOpacity());
 }
 
-/* ================================================================
-   ANIMATED INTRO
-   ================================================================ */
-function animateIntro(masterG) {
-  const ringClasses = [
-    '.ring-categories',
-    '.ring-nt-names',
-    '.ring-effect',
-    '.ring-precursor',
-    '.ring-location',
-    '.outer-labels'
-  ];
-
-  ringClasses.forEach((cls, i) => {
-    const group = masterG.select(cls);
-    if (group.empty()) return;
-
-    group
-      .attr('opacity', 0)
-      .attr('transform', 'scale(0.7)')
-      .transition()
-      .delay(i * 120)
-      .duration(500)
-      .ease(d3.easeCubicOut)
-      .attr('opacity', 1)
-      .attr('transform', 'scale(1)');
-  });
-
-  // Center decoration fades in
-  masterG.select('.center-deco')
-    .attr('opacity', 0)
-    .transition()
-    .delay(50)
-    .duration(600)
-    .attr('opacity', 1);
-
-  // Ring labels fade in
-  masterG.selectAll('.ring-label-text')
-    .attr('opacity', 0)
-    .transition()
-    .delay(600)
-    .duration(400)
-    .attr('opacity', 1);
-}
-
-/* ================================================================
-   CLICK OUTSIDE TO DESELECT
-   ================================================================ */
-document.addEventListener('click', function(e) {
-  const panel = document.getElementById('detailPanel');
-  const sidebar = document.getElementById('leftSidebar');
-  if (selectedNT &&
-      !panel.contains(e.target) &&
-      !sidebar.contains(e.target) &&
-      !e.target.closest('.interaction-layer') &&
-      !e.target.closest('.cat-segment')) {
-    hideDetailPanel();
+/* CLICK OUTSIDE */
+document.addEventListener('click', (e) => {
+  if (selectedNT && !document.getElementById('detailPanel').contains(e.target) &&
+      !document.getElementById('sidebar').contains(e.target) &&
+      !e.target.closest('.zoomable')) {
+    hideDetail();
   }
 });
 
-/* ================================================================
-   WINDOW RESIZE
-   ================================================================ */
-let resizeTimeout;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(() => drawWheel(true), 150);
-});
+/* RESIZE */
+let resizeT;
+window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => drawWheel(), 150); });
 
-/* ================================================================
-   INITIALIZATION
-   ================================================================ */
+/* INIT */
 function init() {
   buildFilters();
   updateStats();
-  buildLegend();
   drawWheel();
 }
 
-// Wait for fonts to load
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(init);
-} else {
-  window.addEventListener('load', init);
-}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(init);
+else window.addEventListener('load', init);
 </script>
 </body>
 </html>
