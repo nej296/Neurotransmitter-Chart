@@ -613,12 +613,12 @@ function drawWheel() {
 
   // Pass 1: compute a UNIFORM font size that fits ALL visible category labels
   const catTextR = (R0_IN + R0_OUT) / 2;
-  const catAvailLen = R0_OUT * 2.2;
-  let uniformCatFont = 16; // start at max
+  const catAvailLen = R0_OUT * 1.6;
+  let uniformCatFont = 13; // start at max
   cats.forEach(cs => {
     const arcW = (cs.e - cs.s) * catTextR;
-    const fontByArc = Math.min(16, arcW * 0.55);
-    const fontByLen = catAvailLen / (cs.cat.length * 0.52);
+    const fontByArc = Math.min(13, arcW * 0.5);
+    const fontByLen = catAvailLen / (cs.cat.length * 0.6);
     uniformCatFont = Math.min(uniformCatFont, fontByArc, fontByLen);
   });
   uniformCatFont = Math.max(4, uniformCatFont); // floor
